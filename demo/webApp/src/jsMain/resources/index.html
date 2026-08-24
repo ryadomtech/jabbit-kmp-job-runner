@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>Jabbit demo</title>
+    <style>
+        :root { color-scheme: light dark; }
+        body {
+            margin: 0;
+            padding: 32px 24px;
+            font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 760px;
+            margin-inline: auto;
+        }
+        h1 { margin: 0 0 4px; font-size: 28px; }
+        p.lead { margin: 0 0 20px; opacity: .7; }
+        .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+        button {
+            font: inherit;
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            background: #1976d2;
+            color: #fff;
+            cursor: pointer;
+        }
+        button.secondary { background: transparent; border-color: currentColor; color: inherit; }
+        button:hover { filter: brightness(1.08); }
+        .count { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; opacity: .6; }
+        .jobs { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+        .job {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border: 1px solid rgba(128, 128, 128, .3);
+            border-radius: 10px;
+        }
+        .state {
+            font-size: 11px;
+            letter-spacing: .04em;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: #fff;
+            white-space: nowrap;
+        }
+        .id { font: 11px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; opacity: .5; }
+        .empty { opacity: .6; }
+    </style>
+</head>
+<body>
+<div id="app"></div>
+<script src="demo.js"></script>
+</body>
+</html>
