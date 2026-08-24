@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.kotlinMultiplatformLibrary)
     alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.publishing)
 }
 
 kotlin {
@@ -89,3 +90,45 @@ kotlin {
         }
     }
 }
+
+mavenPublishing {
+    publishToMavenCentral(automaticRelease = true)
+
+    signAllPublications()
+
+    coordinates(
+        groupId = "tech.ryadom",
+        artifactId = "jabbit",
+        version = "1.0.0"
+    )
+
+    pom {
+        name.set("Jabbit")
+        description.set("Kotlin Multiplatform job runner for Android, iOS and the browser, with an API modelled after androidx.work.WorkManager.")
+        inceptionYear.set("2026")
+        url.set("https://github.com/ryadomtech/jabbit-kmp-job-runner")
+
+        licenses {
+            license {
+                name.set("The Apache License, Version 2.0")
+                url.set("http://www.apache.org/licenses/LICENSE-2.0")
+                distribution.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+            }
+        }
+
+        developers {
+            developer {
+                id.set("adkozlovskiy")
+                name.set("Alexey Kozlovsky")
+                email.set("adkozlovskiy@gmail.com")
+            }
+        }
+
+        scm {
+            url.set("https://github.com/ryadomtech/jabbit-kmp-job-runner")
+            connection.set("scm:git:git://github.com/ryadomtech/jabbit-kmp-job-runner.git")
+            developerConnection.set("scm:git:ssh://git@github.com/ryadomtech/jabbit-kmp-job-runner.git")
+        }
+    }
+}
+
