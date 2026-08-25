@@ -27,9 +27,7 @@ fun demoConfiguration(): JabbitConfiguration = jabbitConfiguration {
     logger(JabbitLogger.Console)
 }
 
-class JabbitDemo(
-    private val jabbit: Jabbit
-) {
+class JabbitDemo(private val jabbit: Jabbit) {
 
     val jobs: Flow<List<JobInfo>> = jabbit.getJobInfosByTagFlow(DEMO_TAG)
 

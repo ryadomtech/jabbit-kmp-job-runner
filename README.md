@@ -1,12 +1,12 @@
 # Jabbit
 
-Kotlin Multiplatform job runner for Android, iOS and the browser, with an API modelled after
-`androidx.work.WorkManager`.
+Kotlin Multiplatform job runner for Android, iOS, the desktop and the browser, with an API
+modelled after `androidx.work.WorkManager`.
 
 Jobs are declarative: you describe *what* to run, *how often*, and *under which device conditions*,
-and the platform decides *when*. On Android that decision is delegated to `WorkManager`. On iOS and
-the web, where no equivalent system service exists, Jabbit persists the queue itself and drives it
-from the app, using whatever background windows the platform grants.
+and the platform decides *when*. On Android that decision is delegated to `WorkManager`. Everywhere
+else, where no equivalent system service exists, Jabbit persists the queue itself and drives it from
+the app, using whatever background windows the platform grants.
 
 - One API in `commonMain`, no `expect`/`actual` in your own code beyond obtaining the instance.
 - Jobs survive process death, reboots and page reloads.
@@ -27,8 +27,9 @@ kotlin {
 }
 ```
 
-Targets: `android`, `iosX64`, `iosArm64`, `iosSimulatorArm64`, `js`, `wasmJs`. Minimum versions:
-Android API 23, iOS 13, and any browser with IndexedDB.
+Targets: `android`, `iosX64`, `iosArm64`, `iosSimulatorArm64`, `jvm`, `js`, `wasmJs`.
+
+Minimum versions: Android API 23, iOS 13, JDK 21 on the desktop, and any browser with IndexedDB.
 
 ## Writing a worker
 
@@ -56,9 +57,9 @@ class SyncWorker(private val api: Api) : JabbitWorker {
 }
 ```
 
-`doWork` is cancelled cooperatively when the platform stops the job — when constraints stop holding,
-when the job is cancelled, or when an iOS background window expires. A cancelled job returns to
-`ENQUEUED` and runs again later, so check `isActive` inside long loops.
+`doWork` is cancelled cooperatively when the platform stops the job — when constraints stop
+holding, when the job is cancelled, or when an iOS background window expires. A cancelled job
+returns to `ENQUEUED` and runs again later, so check `isActive` inside long loops.
 
 ## Creating the scheduler
 
@@ -171,6 +172,28 @@ try await jabbit.enqueueUniquePeriodic(
 )
 ```
 
+**Desktop (JVM)** — once, when the application starts:
+
+```kotlin
+val jabbit = createJabbit(
+    configuration = jabbitConfiguration {
+        worker(SyncWorker.NAME) { SyncWorker(api) }
+    },
+    options = JabbitDesktopOptions(applicationName = "Example")
+)
+```
+
+The queue is a file under the directory the operating system reserves for the application:
+`%APPDATA%` on Windows, `~/Library/Application Support` on macOS, `$XDG_DATA_HOME` elsewhere. Writes
+are atomic, so a crash mid-write leaves the previous queue intact rather than half a document.
+
+`createJabbit` returns a
+[`DesktopJabbit`](jabbit/src/jvmMain/kotlin/tech/ryadom/jabbit/DesktopJabbit.kt), which is
+`AutoCloseable`: closing it stops the scheduler and releases the single instance lock. Two
+processes sharing one storage directory would run the same job twice, so the second one fails fast
+with a clear message — pass a different `storageDirectory`, or turn `singleInstanceLock` off if
+both are meant to keep their own queue.
+
 ## Running jobs after the last tab closes
 
 The browser only lets a closed app do work through a service worker. Build the worker script as its
@@ -265,16 +288,21 @@ of attempts so far, and when the next run is planned.
 
 ## Constraints
 
-| Constraint              | Android                     | iOS                                                                                                        | Browser                                                                                                                                  |
-|-------------------------|-----------------------------|------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------|
-| `requiredNetworkType`   | `androidx.work.NetworkType` | `NWPathMonitor`; `UNMETERED`/`METERED` follow the "expensive" flag, `NOT_ROAMING` behaves like `CONNECTED` | `navigator.onLine`; metering from `navigator.connection` (Chromium), unknown counts as unmetered; `NOT_ROAMING` behaves like `CONNECTED` |
-| `requiresCharging`      | system                      | `UIDevice.batteryState`, plus `requiresExternalPower` on the background request                            | `navigator.getBattery()`, Chromium only                                                                                                  |
-| `requiresBatteryNotLow` | system                      | battery level against `JabbitIosOptions.lowBatteryThreshold`                                               | battery level against `JabbitBrowserOptions.lowBatteryThreshold`, Chromium only                                                          |
-| `requiresStorageNotLow` | system                      | free space against `JabbitIosOptions.lowStorageThresholdBytes`                                             | remaining quota from `navigator.storage.estimate()`                                                                                      |
-| `requiresDeviceIdle`    | system, API 23+             | satisfied only inside a `BGProcessingTask`, which the system schedules while the device is idle            | satisfied while the page is hidden, or inside the service worker                                                                         |
+| Constraint | Android | iOS | Desktop | Browser |
+| --- | --- | --- | --- | --- |
+| `requiredNetworkType` | `androidx.work.NetworkType` | `NWPathMonitor`; `UNMETERED`/`METERED` follow the "expensive" flag, `NOT_ROAMING` behaves like `CONNECTED` | a non-loopback interface that is up; metering is unknown and counts as unmetered | `navigator.onLine`; metering from `navigator.connection` (Chromium), unknown counts as unmetered; `NOT_ROAMING` behaves like `CONNECTED` |
+| `requiresCharging` | system | `UIDevice.batteryState`, plus `requiresExternalPower` on the background request | `/sys/class/power_supply` on Linux, `pmset` on macOS, unknown elsewhere | `navigator.getBattery()`, Chromium only |
+| `requiresBatteryNotLow` | system | battery level against `JabbitIosOptions.lowBatteryThreshold` | battery level against `JabbitDesktopOptions.lowBatteryThreshold` | battery level against `JabbitBrowserOptions.lowBatteryThreshold`, Chromium only |
+| `requiresStorageNotLow` | system | free space against `JabbitIosOptions.lowStorageThresholdBytes` | usable space on the volume of `storageDirectory` | remaining quota from `navigator.storage.estimate()` |
+| `requiresDeviceIdle` | system, API 23+ | satisfied only inside a `BGProcessingTask`, which the system schedules while the device is idle | always satisfied — the desktop exposes no portable idle signal | satisfied while the page is hidden, or inside the service worker |
 
-Where a browser exposes no API for a constraint, Jabbit treats it as satisfied. Blocking instead
-would strand jobs forever on browsers that will never report a battery.
+Where a platform exposes no API for a constraint, Jabbit treats it as satisfied. Blocking instead
+would strand jobs forever on browsers that will never report a battery, or on a desktop that has no
+battery at all.
+
+The desktop has no callbacks for any of this, so it is polled every `pollInterval` (30 seconds by
+default). That is what decides how quickly a job notices its constraints became satisfiable, and how
+often `pmset` is invoked on macOS — set `readPowerSource = false` to never invoke it.
 
 ## What each platform guarantees
 
@@ -295,6 +323,11 @@ Because iOS schedules opportunistically, treat a periodic job as "at most once p
 eventually", never as a timer. `BGTaskScheduler` does not fire in the simulator unless triggered
 manually from the debugger.
 
+**Desktop.** Nothing runs while the application is closed: a desktop process is the only thing that
+can run its own background work. The queue is persisted, so whatever was pending is picked up on the
+next start, and a job interrupted mid-run is retried. Treat the desktop scheduler as "runs while the
+application is open, and never forgets what it has not finished".
+
 **Browser.** The queue lives in IndexedDB. While a page is open, jobs behave as they do everywhere
 else. When the page is hidden the browser throttles timers to about a minute, so a job may start
 late. When every page is closed, only the service worker events above can run anything, and only in
@@ -303,10 +336,15 @@ off next time it is opened", with background execution as a Chromium bonus rathe
 
 ## Demo
 
-`demo/` holds a Compose app for Android and a page for the browser, both driving the same workers:
+`demo/` holds a Compose app for Android, a Compose app for the desktop, and a page for the browser,
+all driving the same workers:
 
 ```bash
 ./gradlew :demo:androidApp:installDebug
+```
+
+```bash
+./gradlew :demo:desktopApp:run
 ```
 
 ```bash
@@ -319,13 +357,15 @@ off next time it is opened", with background execution as a Chromium bonus rathe
 ./gradlew :jabbit:build
 ```
 
-Tests run the scheduler against a virtual clock on the JVM and the iOS simulator, and against real
-IndexedDB, Web Locks and `BroadcastChannel` in headless Chrome:
+Tests run the scheduler against a virtual clock on the JVM and the iOS simulator, against real files
+and a real power source on the desktop, and against real IndexedDB, Web Locks and `BroadcastChannel`
+in headless Chrome:
 
 ```bash
-./gradlew :jabbit:testAndroidHostTest :jabbit:iosSimulatorArm64Test
+./gradlew :jabbit:testAndroidHostTest :jabbit:jvmTest :jabbit:iosSimulatorArm64Test
 ```
 
 ```bash
-CHROME_BIN="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" ./gradlew :jabbit:jsBrowserTest :jabbit:wasmJsBrowserTest
+export CHROME_BIN="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+./gradlew :jabbit:jsBrowserTest :jabbit:wasmJsBrowserTest
 ```

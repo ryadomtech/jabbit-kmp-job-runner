@@ -60,9 +60,8 @@ public class IndexedDbJabbitStorage(
  * Simpler and synchronous, but capped at a few megabytes and **not reachable from a service
  * worker**: jobs stored here only run while a page of the app is open.
  */
-public class LocalStorageJabbitStorage(
-    private val key: String = "tech.ryadom.jabbit.jobs"
-) : JabbitStorage {
+public class LocalStorageJabbitStorage(private val key: String = "tech.ryadom.jabbit.jobs") :
+    JabbitStorage {
 
     override suspend fun read(): String? = localStorageRead(key)
 

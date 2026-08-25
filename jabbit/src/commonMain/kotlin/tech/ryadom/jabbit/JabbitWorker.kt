@@ -46,16 +46,24 @@ public fun interface JabbitWorker {
  */
 public class JobExecution internal constructor(
 
-    /** Identifier of the running job. */
+    /**
+     * Identifier of the running job.
+     */
     public val id: JobId,
 
-    /** Name the worker is registered under. */
+    /**
+     * Name the worker is registered under.
+     */
     public val workerName: String,
 
-    /** Payload supplied by [JobRequest.inputData]. */
+    /**
+     * Payload supplied by [JobRequest.inputData].
+     */
     public val inputData: JobData,
 
-    /** Tags attached to the request. */
+    /**
+     * Tags attached to the request.
+     */
     public val tags: Set<String>,
 
     /**
@@ -72,7 +80,8 @@ public class JobExecution internal constructor(
     /**
      * Publishes intermediate progress, observable through [JobInfo.progress].
      *
-     * Progress is dropped once the job finishes.
+     * Progress lives in memory only: it is dropped once the job finishes, and an attempt that is
+     * interrupted starts its next run without it.
      */
     public suspend fun setProgress(data: JobData) {
         progressReporter.report(data)
@@ -80,7 +89,9 @@ public class JobExecution internal constructor(
 
     public companion object {
 
-        /** Creates an instance for testing a worker without a scheduler. */
+        /**
+         * Creates an instance for testing a worker without a scheduler.
+         */
         public fun forTesting(
             id: JobId = JobId.random(),
             workerName: String = "test",
@@ -99,10 +110,14 @@ public class JobExecution internal constructor(
     }
 }
 
-/** Receiver of [JobExecution.setProgress] calls. */
+/**
+ * Receiver of [JobExecution.setProgress] calls.
+ */
 public fun interface ProgressReporter {
 
-    /** Publishes [data] as the current progress of the running job. */
+    /**
+     * Publishes [data] as the current progress of the running job.
+     */
     public suspend fun report(data: JobData)
 }
 

@@ -28,6 +28,7 @@ import tech.ryadom.jabbit.JabbitIosOptions
 import tech.ryadom.jabbit.JabbitLogger
 import tech.ryadom.jabbit.debug
 import tech.ryadom.jabbit.warn
+import kotlin.concurrent.Volatile
 
 private const val BACKGROUND_TASK_NAME = "tech.ryadom.jabbit"
 private const val PLAN_TOLERANCE_MILLIS = 60_000L
@@ -39,9 +40,16 @@ internal class IosBackgroundCoordinator(
     private val deviceState: IosDeviceStateProvider
 ) {
 
+    @Volatile
     private var runUntilIdle: (suspend () -> Unit)? = null
+
+    @Volatile
     private var wakeUp: (() -> Unit)? = null
+
+    @Volatile
     private var submittedPlan: WakeUpPlan? = null
+
+    @Volatile
     private var pendingPlan: WakeUpPlan? = null
 
     fun install(runUntilIdle: suspend () -> Unit, wakeUp: () -> Unit) {
@@ -55,9 +63,10 @@ internal class IosBackgroundCoordinator(
         pendingPlan = plan
         val submitted = submittedPlan
         val unchanged = plan != null && submitted != null &&
-                plan.requiresNetwork == submitted.requiresNetwork &&
-                plan.requiresPower == submitted.requiresPower &&
-                (plan.atMillis - submitted.atMillis) in -PLAN_TOLERANCE_MILLIS..PLAN_TOLERANCE_MILLIS
+            plan.requiresNetwork == submitted.requiresNetwork &&
+            plan.requiresPower == submitted.requiresPower &&
+            (plan.atMillis - submitted.atMillis) in
+            -PLAN_TOLERANCE_MILLIS..PLAN_TOLERANCE_MILLIS
 
         if (unchanged || (plan == null && submitted == null)) return
         submit(plan)
@@ -75,8 +84,9 @@ internal class IosBackgroundCoordinator(
         } else {
             logger.warn(
                 "Could not register background task '$identifier'. Add it to " +
-                        "BGTaskSchedulerPermittedIdentifiers in Info.plist and register Jabbit before " +
-                        "application(_:didFinishLaunchingWithOptions:) returns."
+                    "BGTaskSchedulerPermittedIdentifiers in Info.plist and register " +
+                    "Jabbit before " +
+                    "application(_:didFinishLaunchingWithOptions:) returns."
             )
         }
     }
@@ -143,7 +153,7 @@ internal class IosBackgroundCoordinator(
                 submittedPlan = null
                 logger.warn(
                     "Could not submit background task request '$identifier': " +
-                            errorPointer.value?.localizedDescription
+                        errorPointer.value?.localizedDescription
                 )
             }
         }

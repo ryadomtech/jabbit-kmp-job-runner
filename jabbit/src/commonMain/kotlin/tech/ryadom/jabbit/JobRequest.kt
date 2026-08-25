@@ -225,10 +225,7 @@ public class PeriodicJobRequest internal constructor(
     /**
      * Builder for [PeriodicJobRequest].
      */
-    public class Builder(
-        private val workerName: String,
-        private val repeatInterval: Duration
-    ) {
+    public class Builder(private val workerName: String, private val repeatInterval: Duration) {
 
         private var id: JobId = JobId.random()
         private var inputData: JobData = JobData.EMPTY

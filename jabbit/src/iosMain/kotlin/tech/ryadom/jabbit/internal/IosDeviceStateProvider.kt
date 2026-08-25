@@ -27,10 +27,9 @@ import platform.UIKit.UIDeviceBatteryState
 import platform.UIKit.UIDeviceBatteryStateDidChangeNotification
 import platform.darwin.dispatch_get_main_queue
 import tech.ryadom.jabbit.JabbitIosOptions
+import kotlin.concurrent.Volatile
 
-internal class IosDeviceStateProvider(
-    private val options: JabbitIosOptions
-) : DeviceStateProvider {
+internal class IosDeviceStateProvider(private val options: JabbitIosOptions) : DeviceStateProvider {
 
     private val signals = MutableSharedFlow<Unit>(
         replay = 0,
@@ -38,8 +37,13 @@ internal class IosDeviceStateProvider(
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
+    @Volatile
     private var networkConnected: Boolean = true
+
+    @Volatile
     private var networkExpensive: Boolean = false
+
+    @Volatile
     private var backgroundProcessing: Boolean = false
 
     override val changes: Flow<DeviceState> = signals.map { current() }
@@ -58,7 +62,7 @@ internal class IosDeviceStateProvider(
         val device = UIDevice.currentDevice
         val batteryState = device.batteryState
         val charging = batteryState == UIDeviceBatteryState.UIDeviceBatteryStateCharging ||
-                batteryState == UIDeviceBatteryState.UIDeviceBatteryStateFull
+            batteryState == UIDeviceBatteryState.UIDeviceBatteryStateFull
         val level = device.batteryLevel
 
         DeviceState(

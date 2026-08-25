@@ -95,14 +95,30 @@ private fun Actions(demo: JabbitDemo, scope: CoroutineScope) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        Button(onClick = { scope.launch { demo.syncNow() } }) { Text("Sync now") }
-        Button(onClick = { scope.launch { demo.uploadOverWifi() } }) { Text("Upload on Wi-Fi") }
-        Button(onClick = { scope.launch { demo.uploadWithRetry() } }) { Text("Upload that retries") }
-        Button(onClick = { scope.launch { demo.cleanupWhileCharging() } }) { Text("Clean while charging") }
-        Button(onClick = { scope.launch { demo.schedulePeriodicCleanup() } }) { Text("Every 6 hours") }
-        Button(onClick = { scope.launch { demo.failingJob() } }) { Text("Failing job") }
-        OutlinedButton(onClick = { scope.launch { demo.cancelEverything() } }) { Text("Cancel all") }
-        OutlinedButton(onClick = { scope.launch { demo.clearFinished() } }) { Text("Clear finished") }
+        Button(onClick = { scope.launch { demo.syncNow() } }) {
+            Text("Sync now")
+        }
+        Button(onClick = { scope.launch { demo.uploadOverWifi() } }) {
+            Text("Upload on Wi-Fi")
+        }
+        Button(onClick = { scope.launch { demo.uploadWithRetry() } }) {
+            Text("Upload that retries")
+        }
+        Button(onClick = { scope.launch { demo.cleanupWhileCharging() } }) {
+            Text("Clean while charging")
+        }
+        Button(onClick = { scope.launch { demo.schedulePeriodicCleanup() } }) {
+            Text("Every 6 hours")
+        }
+        Button(onClick = { scope.launch { demo.failingJob() } }) {
+            Text("Failing job")
+        }
+        OutlinedButton(onClick = { scope.launch { demo.cancelEverything() } }) {
+            Text("Cancel all")
+        }
+        OutlinedButton(onClick = { scope.launch { demo.clearFinished() } }) {
+            Text("Clear finished")
+        }
     }
 }
 

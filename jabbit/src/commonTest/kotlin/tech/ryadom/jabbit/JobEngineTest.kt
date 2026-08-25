@@ -11,7 +11,6 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import tech.ryadom.jabbit.internal.DeviceState
 import tech.ryadom.jabbit.internal.DeviceStateProvider
-import tech.ryadom.jabbit.internal.InMemoryJobRecordStorage
 import tech.ryadom.jabbit.internal.JobEngine
 import tech.ryadom.jabbit.internal.JobRecordStorage
 import kotlin.test.Test
@@ -93,7 +92,9 @@ class JobEngineTest {
     @Test
     fun failsPermanentlyOnFailureAndOnThrow() = runTest {
         val engine = engine {
-            worker("failing") { JabbitWorker { JobResult.failure(jobDataOf("reason" to "nope")) } }
+            worker("failing") {
+                JabbitWorker { JobResult.failure(jobDataOf("reason" to "nope")) }
+            }
             worker("throwing") { JabbitWorker { error("boom") } }
         }
         engine.start()
@@ -105,7 +106,10 @@ class JobEngineTest {
         assertEquals(JobState.FAILED, states["throwing"])
         assertEquals(
             "nope",
-            engine.snapshot().first { it.workerName == "failing" }.outputData.getString("reason")
+            engine.snapshot()
+                .first { it.workerName == "failing" }
+                .outputData
+                .getString("reason")
         )
     }
 
@@ -167,7 +171,14 @@ class JobEngineTest {
     @Test
     fun cancelsByTagAndByUniqueName() = runTest {
         val engine =
-            engine { worker("slow") { JabbitWorker { delay(1.hours); JobResult.success() } } }
+            engine {
+                worker("slow") {
+                    JabbitWorker {
+                        delay(1.hours)
+                        JobResult.success()
+                    }
+                }
+            }
         engine.start()
         engine.enqueue(listOf(oneTimeJob("slow") { addTag("group") }))
         engine.enqueueUnique("named", ExistingJobPolicy.KEEP, oneTimeJob("slow"))
@@ -183,7 +194,14 @@ class JobEngineTest {
     @Test
     fun keepsOrReplacesUniqueJobs() = runTest {
         val engine =
-            engine { worker("slow") { JabbitWorker { delay(1.hours); JobResult.success() } } }
+            engine {
+                worker("slow") {
+                    JabbitWorker {
+                        delay(1.hours)
+                        JobResult.success()
+                    }
+                }
+            }
         engine.start()
 
         val first = oneTimeJob("slow")
@@ -232,7 +250,14 @@ class JobEngineTest {
     @Test
     fun reschedulesPeriodicJobsAfterEverySuccess() = runTest {
         var runs = 0
-        val engine = engine { worker("beat") { JabbitWorker { runs++; JobResult.success() } } }
+        val engine = engine {
+            worker("beat") {
+                JabbitWorker {
+                    runs++
+                    JobResult.success()
+                }
+            }
+        }
         engine.start()
         engine.enqueue(listOf(periodicJob("beat", repeatInterval = 15.minutes)))
 
@@ -253,7 +278,14 @@ class JobEngineTest {
     @Test
     fun stopsRepeatingWhenAPeriodicJobFails() = runTest {
         var runs = 0
-        val engine = engine { worker("beat") { JabbitWorker { runs++; JobResult.failure() } } }
+        val engine = engine {
+            worker("beat") {
+                JabbitWorker {
+                    runs++
+                    JobResult.failure()
+                }
+            }
+        }
         engine.start()
         engine.enqueue(listOf(periodicJob("beat", repeatInterval = 15.minutes)))
 
@@ -316,7 +348,12 @@ class JobEngineTest {
     fun persistsJobsAndRecoversInterruptedOnes() = runTest {
         val storage = InMemoryJobRecordStorage()
         val first = engine(storage = storage) {
-            worker("slow") { JabbitWorker { delay(1.hours); JobResult.success() } }
+            worker("slow") {
+                JabbitWorker {
+                    delay(1.hours)
+                    JobResult.success()
+                }
+            }
         }
         first.start()
         first.enqueue(listOf(oneTimeJob("slow")))
@@ -388,9 +425,7 @@ class JobEngineTest {
     )
 }
 
-private class FakeDeviceStateProvider(
-    initial: DeviceState = DeviceState()
-) : DeviceStateProvider {
+private class FakeDeviceStateProvider(initial: DeviceState = DeviceState()) : DeviceStateProvider {
 
     private val state = MutableStateFlow(initial)
 

@@ -16,10 +16,8 @@ import tech.ryadom.jabbit.PeriodicJobRequest
 import tech.ryadom.jabbit.requireKnownWorker
 import java.util.UUID
 
-internal class WorkManagerJabbit(
-    context: Context,
-    private val configuration: JabbitConfiguration
-) : Jabbit {
+internal class WorkManagerJabbit(context: Context, private val configuration: JabbitConfiguration) :
+    Jabbit {
 
     private val workManager = WorkManager.getInstance(context.applicationContext)
 
@@ -83,13 +81,16 @@ internal class WorkManagerJabbit(
     }
 
     override suspend fun getJobInfo(id: JobId): JobInfo? =
-        workManager.getWorkInfoById(UUID.fromString(id.value)).await()?.toJobInfo()
+        workManager.getWorkInfoById(UUID.fromString(id.value)).await()
+            ?.toJobInfo()
 
     override suspend fun getJobInfosByTag(tag: String): List<JobInfo> =
-        workManager.getWorkInfosByTag(tag).await().map { it.toJobInfo() }
+        workManager.getWorkInfosByTag(tag).await()
+            .map { it.toJobInfo() }
 
     override suspend fun getJobInfosForUniqueJob(uniqueName: String): List<JobInfo> =
-        workManager.getWorkInfosForUniqueWork(uniqueName).await().map { it.toJobInfo() }
+        workManager.getWorkInfosForUniqueWork(uniqueName).await()
+            .map { it.toJobInfo() }
 
     override fun getJobInfoFlow(id: JobId): Flow<JobInfo?> =
         workManager.getWorkInfoByIdFlow(UUID.fromString(id.value))

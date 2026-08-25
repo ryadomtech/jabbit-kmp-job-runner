@@ -133,14 +133,18 @@ internal class BrowserJabbit(
         dispatch(TabMessage.Prune) { engine.prune() }
     }
 
-    override suspend fun getJobInfo(id: JobId): JobInfo? =
-        records.value.firstOrNull { it.id == id.value }?.toJobInfo()
+    override suspend fun getJobInfo(id: JobId): JobInfo? = records.value.firstOrNull {
+        it.id == id.value
+    }?.toJobInfo()
 
-    override suspend fun getJobInfosByTag(tag: String): List<JobInfo> =
-        records.value.filter { tag in it.tags }.map { it.toJobInfo() }
+    override suspend fun getJobInfosByTag(tag: String): List<JobInfo> = records.value.filter {
+        tag in it.tags
+    }.map { it.toJobInfo() }
 
     override suspend fun getJobInfosForUniqueJob(uniqueName: String): List<JobInfo> =
-        records.value.filter { it.uniqueName == uniqueName }.map { it.toJobInfo() }
+        records.value.filter {
+            it.uniqueName == uniqueName
+        }.map { it.toJobInfo() }
 
     override fun getJobInfoFlow(id: JobId): Flow<JobInfo?> = records
         .map { snapshot -> snapshot.firstOrNull { it.id == id.value }?.toJobInfo() }
@@ -151,7 +155,9 @@ internal class BrowserJabbit(
         .distinctUntilChanged()
 
     override fun getJobInfosForUniqueJobFlow(uniqueName: String): Flow<List<JobInfo>> = records
-        .map { snapshot -> snapshot.filter { it.uniqueName == uniqueName }.map { it.toJobInfo() } }
+        .map { snapshot ->
+            snapshot.filter { it.uniqueName == uniqueName }.map { it.toJobInfo() }
+        }
         .distinctUntilChanged()
 
     private suspend fun dispatch(command: TabMessage, apply: suspend () -> Unit) {
@@ -214,10 +220,15 @@ internal class BrowserJabbit(
             )
 
             is TabMessage.CancelJob -> engine.cancel(JobId(message.id))
+
             is TabMessage.CancelByTag -> engine.cancelByTag(message.tag)
+
             is TabMessage.CancelUnique -> engine.cancelUnique(message.uniqueName)
+
             TabMessage.CancelAll -> engine.cancelAll()
+
             TabMessage.Prune -> engine.prune()
+
             TabMessage.RequestState, is TabMessage.State -> Unit
         }
     }

@@ -18,7 +18,9 @@ import kotlin.time.Duration.Companion.milliseconds
  */
 public class JabbitConfiguration internal constructor(
 
-    /** Factory used to create a worker when a job starts. */
+    /**
+     * Factory used to create a worker when a job starts.
+     */
     public val workerFactory: JabbitWorkerFactory,
 
     /**
@@ -28,7 +30,9 @@ public class JabbitConfiguration internal constructor(
      */
     public val registeredWorkerNames: Set<String>,
 
-    /** Sink for diagnostic output. */
+    /**
+     * Sink for diagnostic output.
+     */
     public val logger: JabbitLogger,
 
     /**
@@ -48,7 +52,9 @@ public class JabbitConfiguration internal constructor(
     internal val hasCustomWorkerFactory: Boolean
 ) {
 
-    /** Builder for [JabbitConfiguration]. */
+    /**
+     * Builder for [JabbitConfiguration].
+     */
     public class Builder {
 
         private val workers = mutableMapOf<String, () -> JabbitWorker>()
@@ -65,9 +71,8 @@ public class JabbitConfiguration internal constructor(
          */
         public fun worker(name: String, factory: () -> JabbitWorker): Builder = apply {
             require(name.isNotBlank()) { "Worker name must not be blank" }
-            require(workers.put(name, factory) == null) {
-                "Worker '$name' is already registered"
-            }
+            require(name !in workers) { "Worker '$name' is already registered" }
+            workers[name] = factory
         }
 
         /**
@@ -79,16 +84,22 @@ public class JabbitConfiguration internal constructor(
             fallbackFactory = factory
         }
 
-        /** Routes diagnostic output into [logger]. */
+        /**
+         * Routes diagnostic output into [logger].
+         */
         public fun logger(logger: JabbitLogger): Builder = apply { this.logger = logger }
 
-        /** Limits how many jobs may run at the same time on iOS. */
+        /**
+         * Limits how many jobs may run at the same time on iOS.
+         */
         public fun maxConcurrentJobs(count: Int): Builder = apply {
             require(count > 0) { "maxConcurrentJobs must be positive, was $count" }
             maxConcurrentJobs = count
         }
 
-        /** Sets how long finished jobs stay observable on iOS. */
+        /**
+         * Sets how long finished jobs stay observable on iOS.
+         */
         public fun finishedJobRetention(duration: Duration): Builder = apply {
             require(duration.isPositive()) {
                 "finishedJobRetention must be positive, was $duration"
@@ -96,11 +107,15 @@ public class JabbitConfiguration internal constructor(
             finishedJobRetention = duration
         }
 
-        /** Sets how long finished jobs stay observable on iOS, in milliseconds. */
+        /**
+         * Sets how long finished jobs stay observable on iOS, in milliseconds.
+         */
         public fun finishedJobRetentionMillis(millis: Long): Builder =
             finishedJobRetention(millis.milliseconds)
 
-        /** Builds the configuration. */
+        /**
+         * Builds the configuration.
+         */
         public fun build(): JabbitConfiguration {
             val registered = workers.toMap()
             val fallback = fallbackFactory
@@ -144,6 +159,6 @@ internal fun JabbitConfiguration.requireKnownWorker(workerName: String) {
     if (hasCustomWorkerFactory) return
     require(workerName in registeredWorkerNames) {
         "Worker '$workerName' is not registered. Known workers: " +
-                registeredWorkerNames.sorted().joinToString()
+            registeredWorkerNames.sorted().joinToString()
     }
 }

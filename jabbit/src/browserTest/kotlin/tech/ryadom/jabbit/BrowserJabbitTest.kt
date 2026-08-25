@@ -18,7 +18,8 @@ class BrowserJabbitTest {
         val jabbit = newJabbit {
             worker("greet") {
                 JabbitWorker { job ->
-                    val output = jobDataOf("greeting" to "hello ${job.inputData.getString("name")}")
+                    val name = job.inputData.getString("name")
+                    val output = jobDataOf("greeting" to "hello $name")
                     finished.complete(output)
                     JobResult.success(output)
                 }
@@ -69,7 +70,9 @@ class BrowserJabbitTest {
             worker("slow") { JabbitWorker { JobResult.retry() } }
         }
 
-        val request = oneTimeJob("slow") { setBackoffCriteriaMillis(BackoffPolicy.LINEAR, 60_000) }
+        val request = oneTimeJob("slow") {
+            setBackoffCriteriaMillis(BackoffPolicy.LINEAR, 60_000)
+        }
         first.enqueue(request)
 
         withContext(Dispatchers.Default) {

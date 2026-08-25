@@ -1,6 +1,7 @@
 package tech.ryadom.jabbit
 
 import android.content.Context
+import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import tech.ryadom.jabbit.internal.JabbitRuntime
@@ -16,10 +17,8 @@ import tech.ryadom.jabbit.internal.toWorkData
  * the [JabbitConfiguration] installed by `createJabbit`. It is public because `WorkManager`
  * requires it to be; applications never reference it directly.
  */
-public class JabbitDelegatingWorker(
-    appContext: Context,
-    parameters: WorkerParameters
-) : CoroutineWorker(appContext, parameters) {
+public class JabbitDelegatingWorker(appContext: Context, parameters: WorkerParameters) :
+    CoroutineWorker(appContext, parameters) {
 
     override suspend fun doWork(): Result {
         val configuration = JabbitRuntime.configuration ?: return Result.failure()

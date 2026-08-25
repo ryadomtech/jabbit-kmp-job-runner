@@ -32,7 +32,7 @@ fun main() {
         element("p") {
             className = "lead"
             textContent = "The queue lives in IndexedDB and survives a reload. " +
-                    "Open a second tab: only one of them runs jobs, both show the same list."
+                "Open a second tab: only one of them runs jobs, both show the same list."
         }
     )
     root.appendChild(actions(demo))

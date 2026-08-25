@@ -14,6 +14,8 @@ kotlin {
 
     jvmToolchain(21)
 
+    jvm()
+
     android {
         namespace = "tech.ryadom.jabbit"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -71,6 +73,8 @@ kotlin {
                 "appleTest" -> dependsOn(standaloneTest)
                 "jsMain", "wasmJsMain" -> dependsOn(browserMain)
                 "jsTest", "wasmJsTest" -> dependsOn(browserTest)
+                "jvmMain" -> dependsOn(standaloneMain)
+                "jvmTest" -> dependsOn(standaloneTest)
             }
         }
 
@@ -99,12 +103,12 @@ mavenPublishing {
     coordinates(
         groupId = "tech.ryadom",
         artifactId = "jabbit",
-        version = "1.0.0"
+        version = "1.1.0"
     )
 
     pom {
         name.set("Jabbit")
-        description.set("Kotlin Multiplatform job runner for Android, iOS and the browser, with an API modelled after androidx.work.WorkManager.")
+        description.set("Kotlin Multiplatform job runner for Android, iOS, the desktop and the browser, with an API modelled after androidx.work.WorkManager.")
         inceptionYear.set("2026")
         url.set("https://github.com/ryadomtech/jabbit-kmp-job-runner")
 

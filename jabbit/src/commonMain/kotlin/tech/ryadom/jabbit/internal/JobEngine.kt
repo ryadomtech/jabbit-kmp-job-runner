@@ -33,8 +33,6 @@ import tech.ryadom.jabbit.debug
 import tech.ryadom.jabbit.error
 import tech.ryadom.jabbit.requireKnownWorker
 
-private const val CONCURRENCY_POLL_MILLIS = 500L
-
 internal class JobEngine(
     private val configuration: JabbitConfiguration,
     private val storage: JobRecordStorage,
@@ -123,6 +121,7 @@ internal class JobEngine(
             val existing = unfinishedUniqueLocked(uniqueName)
             when {
                 existing == null -> Unit
+
                 policy == ExistingJobPolicy.KEEP -> {
                     logger.debug("Unique job '$uniqueName' already exists, keeping it")
                     return@withLock
@@ -252,10 +251,7 @@ internal class JobEngine(
 
                 if (!record.constraints.isSatisfiedBy(deviceState)) continue
 
-                if (running.size >= configuration.maxConcurrentJobs) {
-                    nextWakeAt = minOf(nextWakeAt, now + CONCURRENCY_POLL_MILLIS)
-                    break
-                }
+                if (running.size >= configuration.maxConcurrentJobs) break
 
                 startLocked(record, now)
             }
@@ -274,7 +270,9 @@ internal class JobEngine(
     private suspend fun startLocked(record: JobRecord, nowMillis: Long) {
         val worker = configuration.workerFactory.createWorker(record.workerName)
         if (worker == null) {
-            logger.error("No worker registered for '${record.workerName}', failing job ${record.id}")
+            logger.error(
+                "No worker registered for '${record.workerName}', failing job ${record.id}"
+            )
             putLocked(
                 record.copy(
                     state = JobState.FAILED,
@@ -330,8 +328,10 @@ internal class JobEngine(
 
             val updated = when (outcome) {
                 Outcome.Interrupted -> record.retrying(now, applyBackoff = false)
+
                 is Outcome.Finished -> when (val result = outcome.result) {
                     is JobResult.Success -> record.succeeded(now, result.outputData)
+
                     is JobResult.Failure -> record.copy(
                         state = JobState.FAILED,
                         finishedAtMillis = now,
@@ -354,12 +354,12 @@ internal class JobEngine(
             val record = state.value.firstOrNull { it.id == id } ?: return@withLock
             if (record.state != JobState.RUNNING) return@withLock
             putLocked(record.copy(progress = data))
-            persistLocked()
         }
     }
 
     private fun JobRecord.succeeded(nowMillis: Long, outputData: JobData): JobRecord = when {
         isPeriodic -> nextPeriod(nowMillis).copy(outputData = outputData)
+
         else -> copy(
             state = JobState.SUCCEEDED,
             finishedAtMillis = nowMillis,
@@ -396,14 +396,19 @@ internal class JobEngine(
         )
     }
 
-    private fun unfinishedUniqueLocked(uniqueName: String): JobRecord? =
-        state.value.firstOrNull { it.uniqueName == uniqueName && !it.state.isFinished }
+    private fun unfinishedUniqueLocked(uniqueName: String): JobRecord? = state.value.firstOrNull {
+        it.uniqueName == uniqueName && !it.state.isFinished
+    }
 
     private fun putLocked(record: JobRecord) {
         val current = state.value
         val index = current.indexOfFirst { it.id == record.id }
-        state.value = if (index < 0) current + record else current.toMutableList().also {
-            it[index] = record
+        state.value = if (index < 0) {
+            current + record
+        } else {
+            current.toMutableList().also {
+                it[index] = record
+            }
         }
     }
 

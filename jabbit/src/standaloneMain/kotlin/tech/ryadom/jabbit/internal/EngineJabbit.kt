@@ -12,9 +12,7 @@ import tech.ryadom.jabbit.JobRequest
 import tech.ryadom.jabbit.OneTimeJobRequest
 import tech.ryadom.jabbit.PeriodicJobRequest
 
-internal class IosJabbit(
-    private val engine: JobEngine
-) : Jabbit {
+internal class EngineJabbit(private val engine: JobEngine) : Jabbit {
 
     override suspend fun enqueue(request: JobRequest) {
         engine.enqueue(listOf(request))
@@ -61,14 +59,18 @@ internal class IosJabbit(
         engine.prune()
     }
 
-    override suspend fun getJobInfo(id: JobId): JobInfo? =
-        engine.snapshot().firstOrNull { it.id == id.value }?.toJobInfo()
+    override suspend fun getJobInfo(id: JobId): JobInfo? = engine.snapshot().firstOrNull {
+        it.id == id.value
+    }?.toJobInfo()
 
-    override suspend fun getJobInfosByTag(tag: String): List<JobInfo> =
-        engine.snapshot().filter { tag in it.tags }.map { it.toJobInfo() }
+    override suspend fun getJobInfosByTag(tag: String): List<JobInfo> = engine.snapshot().filter {
+        tag in it.tags
+    }.map { it.toJobInfo() }
 
     override suspend fun getJobInfosForUniqueJob(uniqueName: String): List<JobInfo> =
-        engine.snapshot().filter { it.uniqueName == uniqueName }.map { it.toJobInfo() }
+        engine.snapshot().filter {
+            it.uniqueName == uniqueName
+        }.map { it.toJobInfo() }
 
     override fun getJobInfoFlow(id: JobId): Flow<JobInfo?> = engine.records
         .map { records -> records.firstOrNull { it.id == id.value }?.toJobInfo() }

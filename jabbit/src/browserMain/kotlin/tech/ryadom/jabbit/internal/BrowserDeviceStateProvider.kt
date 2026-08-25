@@ -60,8 +60,8 @@ internal class BrowserDeviceStateProvider(
             networkRoaming = false,
             charging = isCharging ?: true,
             batteryNotLow = isCharging == true ||
-                    level == null ||
-                    level > options.lowBatteryThreshold,
+                level == null ||
+                level > options.lowBatteryThreshold,
             storageNotLow = freeStorageBytes?.let { it > options.lowStorageThresholdBytes } ?: true,
             deviceIdle = isServiceWorkerScope() || isDocumentHidden()
         )
