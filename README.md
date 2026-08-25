@@ -21,7 +21,7 @@ the app, using whatever background windows the platform grants.
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("tech.ryadom:jabbit:1.0.0")
+            implementation("tech.ryadom:jabbit:1.1.0")
         }
     }
 }
