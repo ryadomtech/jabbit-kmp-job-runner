@@ -4,10 +4,7 @@ import kotlinx.serialization.json.Json
 import tech.ryadom.jabbit.JabbitLogger
 import tech.ryadom.jabbit.warn
 
-internal class TabCoordinator(
-    private val channelName: String,
-    private val logger: JabbitLogger
-) {
+internal class TabCoordinator(private val channelName: String, private val logger: JabbitLogger) {
 
     private val json = Json {
         ignoreUnknownKeys = true

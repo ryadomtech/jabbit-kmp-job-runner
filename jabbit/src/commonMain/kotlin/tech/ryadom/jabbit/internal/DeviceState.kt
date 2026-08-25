@@ -31,8 +31,8 @@ internal fun Constraints.isSatisfiedBy(state: DeviceState): Boolean {
     }
 
     return networkSatisfied &&
-            (!requiresCharging || state.charging) &&
-            (!requiresBatteryNotLow || state.batteryNotLow) &&
-            (!requiresStorageNotLow || state.storageNotLow) &&
-            (!requiresDeviceIdle || state.deviceIdle)
+        (!requiresCharging || state.charging) &&
+        (!requiresBatteryNotLow || state.batteryNotLow) &&
+        (!requiresStorageNotLow || state.storageNotLow) &&
+        (!requiresDeviceIdle || state.deviceIdle)
 }

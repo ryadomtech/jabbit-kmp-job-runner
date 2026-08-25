@@ -42,11 +42,17 @@ internal fun JobData.putInto(builder: Data.Builder): Data.Builder {
         val dataKey = VALUE_KEY_PREFIX + key
         when (value) {
             is JobDataValue.BooleanValue -> builder.putBoolean(dataKey, value.value)
+
             is JobDataValue.IntValue -> builder.putInt(dataKey, value.value)
+
             is JobDataValue.LongValue -> builder.putLong(dataKey, value.value)
+
             is JobDataValue.FloatValue -> builder.putFloat(dataKey, value.value)
+
             is JobDataValue.DoubleValue -> builder.putDouble(dataKey, value.value)
+
             is JobDataValue.StringValue -> builder.putString(dataKey, value.value)
+
             is JobDataValue.StringListValue -> builder.putStringArray(
                 dataKey,
                 value.value.toTypedArray()
@@ -112,7 +118,9 @@ internal fun ExistingJobPolicy.toExistingWorkPolicy(): ExistingWorkPolicy = when
 internal fun ExistingPeriodicJobPolicy.toExistingPeriodicWorkPolicy(): ExistingPeriodicWorkPolicy =
     when (this) {
         ExistingPeriodicJobPolicy.KEEP -> ExistingPeriodicWorkPolicy.KEEP
+
         ExistingPeriodicJobPolicy.UPDATE -> ExistingPeriodicWorkPolicy.UPDATE
+
         ExistingPeriodicJobPolicy.CANCEL_AND_REENQUEUE ->
             ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE
     }

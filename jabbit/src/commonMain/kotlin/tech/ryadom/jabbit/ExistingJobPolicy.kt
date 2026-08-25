@@ -5,10 +5,14 @@ package tech.ryadom.jabbit
  */
 public enum class ExistingJobPolicy {
 
-    /** Keeps the existing job and drops the new request. */
+    /**
+     * Keeps the existing job and drops the new request.
+     */
     KEEP,
 
-    /** Cancels the existing job and enqueues the new request. */
+    /**
+     * Cancels the existing job and enqueues the new request.
+     */
     REPLACE
 }
 
@@ -18,7 +22,9 @@ public enum class ExistingJobPolicy {
  */
 public enum class ExistingPeriodicJobPolicy {
 
-    /** Keeps the existing job and drops the new request. */
+    /**
+     * Keeps the existing job and drops the new request.
+     */
     KEEP,
 
     /**

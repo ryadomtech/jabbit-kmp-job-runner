@@ -28,7 +28,9 @@ class ConstraintsTest {
         val wifi = DeviceState(networkConnected = true, networkMetered = false)
 
         assertTrue(Constraints(requiredNetworkType = NetworkType.CONNECTED).isSatisfiedBy(cellular))
-        assertFalse(Constraints(requiredNetworkType = NetworkType.UNMETERED).isSatisfiedBy(cellular))
+        val unmetered = Constraints(requiredNetworkType = NetworkType.UNMETERED)
+
+        assertFalse(unmetered.isSatisfiedBy(cellular))
         assertTrue(Constraints(requiredNetworkType = NetworkType.UNMETERED).isSatisfiedBy(wifi))
         assertFalse(Constraints(requiredNetworkType = NetworkType.METERED).isSatisfiedBy(wifi))
     }

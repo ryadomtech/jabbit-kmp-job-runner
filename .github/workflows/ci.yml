@@ -29,6 +29,12 @@ jobs:
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
 
+      - name: Check code style
+        run: |
+          curl -sSLo ktlint https://github.com/pinterest/ktlint/releases/download/1.8.0/ktlint
+          chmod +x ktlint
+          ./ktlint --relative "jabbit/src/**/*.kt" "demo/**/*.kt"
+
       - name: Build and run tests
         run: ./gradlew build --stacktrace
 

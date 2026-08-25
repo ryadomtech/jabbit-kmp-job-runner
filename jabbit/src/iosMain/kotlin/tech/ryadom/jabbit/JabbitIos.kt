@@ -3,9 +3,9 @@ package tech.ryadom.jabbit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import tech.ryadom.jabbit.internal.EngineJabbit
 import tech.ryadom.jabbit.internal.IosBackgroundCoordinator
 import tech.ryadom.jabbit.internal.IosDeviceStateProvider
-import tech.ryadom.jabbit.internal.IosJabbit
 import tech.ryadom.jabbit.internal.JobEngine
 import tech.ryadom.jabbit.internal.JsonJobRecordStorage
 
@@ -75,5 +75,5 @@ public fun createJabbit(
     )
     engine.start()
 
-    return IosJabbit(engine)
+    return EngineJabbit(engine)
 }

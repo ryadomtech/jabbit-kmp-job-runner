@@ -4,11 +4,7 @@ import tech.ryadom.jabbit.BackoffPolicy
 
 private const val MAX_EXPONENT = 30
 
-internal fun backoffDelayMillis(
-    policy: BackoffPolicy,
-    baseDelayMillis: Long,
-    attempt: Int
-): Long {
+internal fun backoffDelayMillis(policy: BackoffPolicy, baseDelayMillis: Long, attempt: Int): Long {
     val safeAttempt = attempt.coerceAtLeast(1)
     val minMillis = BackoffPolicy.MIN_DELAY.inWholeMilliseconds
     val maxMillis = BackoffPolicy.MAX_DELAY.inWholeMilliseconds
