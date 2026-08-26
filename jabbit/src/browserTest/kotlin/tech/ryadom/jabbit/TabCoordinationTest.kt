@@ -15,27 +15,25 @@ class TabCoordinationTest {
 
     @Test
     fun theElectedInstanceRunsWorkEnqueuedByAnotherOne() = runTest {
-        val storageName = "jabbit-test-${Random.nextInt()}"
+        val queue = "jabbit-test-${Random.nextInt()}"
         val ranOnElected = CompletableDeferred<String>()
 
-        val elected = newJabbit(storageName) {
-            worker("shared") {
+        val elected = newJabbit(queue) {
+            worker(GreetJob) {
                 JabbitWorker { job ->
                     ranOnElected.complete(job.id.value)
-                    JobResult.success(jobDataOf("ranBy" to "elected"))
+                    JobResult.success("elected")
                 }
             }
         }
 
         withContext(Dispatchers.Default) { delay(500) }
 
-        val other = newJabbit(storageName) {
-            worker("shared") {
-                JabbitWorker { JobResult.success(jobDataOf("ranBy" to "other")) }
-            }
+        val other = newJabbit(queue) {
+            worker(GreetJob) { JabbitWorker { JobResult.success("other") } }
         }
 
-        val request = oneTimeJob("shared")
+        val request = oneTimeJob(GreetJob, Greeting("shared"))
         other.enqueue(request)
 
         withContext(Dispatchers.Default) {
@@ -48,20 +46,17 @@ class TabCoordinationTest {
             }
         }
 
-        assertEquals("elected", other.getJobInfo(request.id)?.outputData?.getString("ranBy"))
-        assertEquals("elected", elected.getJobInfo(request.id)?.outputData?.getString("ranBy"))
+        assertEquals("elected", other.getJobInfo(request.id)?.output(GreetJob))
+        assertEquals("elected", elected.getJobInfo(request.id)?.output(GreetJob))
     }
 
-    private fun newJabbit(
-        databaseName: String,
-        configure: JabbitConfiguration.Builder.() -> Unit
-    ): Jabbit = createJabbit(
-        configuration = JabbitConfiguration.Builder().apply(configure).build(),
-        options = JabbitBrowserOptions(
-            queueName = databaseName,
-            storage = IndexedDbJabbitStorage(databaseName = databaseName),
-            backgroundSyncTag = null,
+    private fun newJabbit(queue: String, configure: JabbitScope.() -> Unit): Jabbit = jabbit {
+        configure()
+        browser {
+            queueName = queue
+            storage = IndexedDbJabbitStorage(databaseName = queue)
+            backgroundSyncTag = null
             coordinateTabs = true
-        )
-    )
+        }
+    }
 }

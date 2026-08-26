@@ -2,6 +2,7 @@ package tech.ryadom.jabbit
 
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
@@ -14,41 +15,35 @@ class BrowserJabbitTest {
 
     @Test
     fun runsAJobAndReportsItsOutcome() = runTest {
-        val finished = CompletableDeferred<JobData>()
+        val finished = CompletableDeferred<String>()
         val jabbit = newJabbit {
-            worker("greet") {
+            worker(GreetJob) {
                 JabbitWorker { job ->
-                    val name = job.inputData.getString("name")
-                    val output = jobDataOf("greeting" to "hello $name")
-                    finished.complete(output)
-                    JobResult.success(output)
+                    val greeting = "hello ${job.input.name}"
+                    finished.complete(greeting)
+                    JobResult.success(greeting)
                 }
             }
         }
 
-        val request = oneTimeJob("greet") { setInputData(jobDataOf("name" to "world")) }
+        val request = oneTimeJob(GreetJob, Greeting("world"))
         jabbit.enqueue(request)
 
         withContext(Dispatchers.Default) {
             withTimeout(20.seconds) {
-                assertEquals("hello world", finished.await().getString("greeting"))
+                assertEquals("hello world", finished.await())
                 awaitState(jabbit, request.id, JobState.SUCCEEDED)
             }
         }
 
-        assertEquals(
-            "hello world",
-            jabbit.getJobInfo(request.id)?.outputData?.getString("greeting")
-        )
+        assertEquals("hello world", jabbit.getJobInfo(request.id)?.output(GreetJob))
     }
 
     @Test
     fun waitsForConstraintsItCannotSatisfy() = runTest {
-        val jabbit = newJabbit {
-            worker("never") { JabbitWorker { JobResult.success() } }
-        }
+        val jabbit = newJabbit { worker(NeverJob) { JabbitWorker { JobResult.success() } } }
 
-        val request = oneTimeJob("never") {
+        val request = oneTimeJob(NeverJob) {
             setConstraints(constraints { requiredNetworkType = NetworkType.METERED })
         }
         jabbit.enqueue(request)
@@ -65,13 +60,13 @@ class BrowserJabbitTest {
 
     @Test
     fun survivesAReloadOfTheSameQueue() = runTest {
-        val storage = IndexedDbJabbitStorage(databaseName = "jabbit-test-${Random.nextInt()}")
-        val first = newJabbit(storage) {
-            worker("slow") { JabbitWorker { JobResult.retry() } }
+        val databaseName = "jabbit-test-${Random.nextInt()}"
+        val request = oneTimeJob(FlakyJob) {
+            setBackoffCriteriaMillis(BackoffPolicy.LINEAR, 60_000)
         }
 
-        val request = oneTimeJob("slow") {
-            setBackoffCriteriaMillis(BackoffPolicy.LINEAR, 60_000)
+        val first = newJabbit(databaseName) {
+            worker(FlakyJob) { JabbitWorker { JobResult.retry() } }
         }
         first.enqueue(request)
 
@@ -81,9 +76,10 @@ class BrowserJabbitTest {
             }
         }
 
-        val second = newJabbit(storage) {
-            worker("slow") { JabbitWorker { JobResult.retry() } }
+        val second = newJabbit(databaseName) {
+            worker(FlakyJob) { JabbitWorker { JobResult.retry() } }
         }
+
         withContext(Dispatchers.Default) {
             withTimeout(20.seconds) {
                 awaitState(second, request.id, JobState.ENQUEUED) { it.runAttemptCount == 1 }
@@ -100,21 +96,20 @@ class BrowserJabbitTest {
         while (true) {
             val info = jabbit.getJobInfo(id)
             if (info != null && info.state == state && predicate(info)) return
-            kotlinx.coroutines.delay(50)
+            delay(50)
         }
     }
 
     private fun newJabbit(
-        storage: JabbitStorage = IndexedDbJabbitStorage(
-            databaseName = "jabbit-test-${Random.nextInt()}"
-        ),
-        configure: JabbitConfiguration.Builder.() -> Unit
-    ): Jabbit = createJabbit(
-        configuration = JabbitConfiguration.Builder().apply(configure).build(),
-        options = JabbitBrowserOptions(
-            storage = storage,
-            backgroundSyncTag = null,
+        databaseName: String = "jabbit-test-${Random.nextInt()}",
+        configure: JabbitScope.() -> Unit
+    ): Jabbit = jabbit {
+        configure()
+        browser {
+            queueName = databaseName
+            storage = IndexedDbJabbitStorage(databaseName = databaseName)
+            backgroundSyncTag = null
             coordinateTabs = false
-        )
-    )
+        }
+    }
 }

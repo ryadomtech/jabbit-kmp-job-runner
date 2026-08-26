@@ -215,3 +215,16 @@ internal fun hasActiveClients(onResult: (Boolean) -> Unit): Unit = js(
         ".catch(function(){ onResult(false); });" +
         "})()"
 )
+
+internal fun requestStoragePersistence(onResult: (Boolean) -> Unit): Unit = js(
+    "(function(){" +
+        "if (typeof navigator === 'undefined' || !navigator.storage || " +
+        "!navigator.storage.persist) { onResult(false); return; }" +
+        "navigator.storage.persisted().then(function(already){" +
+        "if (already) { onResult(true); return; }" +
+        "navigator.storage.persist()" +
+        ".then(function(granted){ onResult(granted === true); })" +
+        ".catch(function(){ onResult(false); });" +
+        "}).catch(function(){ onResult(false); });" +
+        "})()"
+)

@@ -20,18 +20,15 @@ import kotlinx.coroutines.withTimeoutOrNull
 import tech.ryadom.jabbit.ExistingJobPolicy
 import tech.ryadom.jabbit.ExistingPeriodicJobPolicy
 import tech.ryadom.jabbit.JabbitConfiguration
-import tech.ryadom.jabbit.JobData
-import tech.ryadom.jabbit.JobExecution
 import tech.ryadom.jabbit.JobId
+import tech.ryadom.jabbit.JobProgress
 import tech.ryadom.jabbit.JobRequest
-import tech.ryadom.jabbit.JobResult
 import tech.ryadom.jabbit.JobState
 import tech.ryadom.jabbit.NetworkType
 import tech.ryadom.jabbit.OneTimeJobRequest
 import tech.ryadom.jabbit.PeriodicJobRequest
 import tech.ryadom.jabbit.debug
 import tech.ryadom.jabbit.error
-import tech.ryadom.jabbit.requireKnownWorker
 
 internal class JobEngine(
     private val configuration: JabbitConfiguration,
@@ -88,11 +85,12 @@ internal class JobEngine(
     }
 
     suspend fun enqueueRecords(records: List<JobRecord>) {
-        records.forEach { configuration.requireKnownWorker(it.workerName) }
+        records.forEach { configuration.requireKnownType(it.typeName) }
         initialization.await()
         mutex.withLock {
             records.forEach { putLocked(it) }
             persistLocked()
+            records.forEach { record -> configuration.notify { it.onEnqueued(record.toJobInfo()) } }
         }
         wakeUp()
     }
@@ -114,9 +112,8 @@ internal class JobEngine(
         policy: ExistingJobPolicy,
         record: JobRecord
     ) {
-        configuration.requireKnownWorker(record.workerName)
+        configuration.requireKnownType(record.typeName)
         initialization.await()
-        val now = clock.nowMillis()
         mutex.withLock {
             val existing = unfinishedUniqueLocked(uniqueName)
             when {
@@ -127,10 +124,11 @@ internal class JobEngine(
                     return@withLock
                 }
 
-                else -> cancelLocked(existing.id, now)
+                else -> dropLocked(existing.id)
             }
             putLocked(record)
             persistLocked()
+            configuration.notify { it.onEnqueued(record.toJobInfo()) }
         }
         wakeUp()
     }
@@ -152,9 +150,8 @@ internal class JobEngine(
         policy: ExistingPeriodicJobPolicy,
         record: JobRecord
     ) {
-        configuration.requireKnownWorker(record.workerName)
+        configuration.requireKnownType(record.typeName)
         initialization.await()
-        val now = clock.nowMillis()
         mutex.withLock {
             val existing = unfinishedUniqueLocked(uniqueName)
             when {
@@ -171,10 +168,11 @@ internal class JobEngine(
                     return@withLock
                 }
 
-                else -> cancelLocked(existing.id, now)
+                else -> dropLocked(existing.id)
             }
             putLocked(record)
             persistLocked()
+            configuration.notify { it.onEnqueued(record.toJobInfo()) }
         }
         wakeUp()
     }
@@ -268,50 +266,53 @@ internal class JobEngine(
     }
 
     private suspend fun startLocked(record: JobRecord, nowMillis: Long) {
-        val worker = configuration.workerFactory.createWorker(record.workerName)
-        if (worker == null) {
-            logger.error(
-                "No worker registered for '${record.workerName}', failing job ${record.id}"
+        val registration = configuration.registrationOf(record.typeName)
+        if (registration == null) {
+            logger.error("No worker registered for '${record.typeName}', failing job ${record.id}")
+            val failed = record.copy(
+                state = JobState.FAILED,
+                finishedAtMillis = nowMillis,
+                failureReason = "no worker is registered for '${record.typeName}'",
+                progress = null
             )
-            putLocked(
-                record.copy(
-                    state = JobState.FAILED,
-                    finishedAtMillis = nowMillis,
-                    progress = JobData.EMPTY
-                )
-            )
+            putLocked(failed)
             persistLocked()
+            configuration.notify { it.onFailed(failed.toJobInfo(), null) }
             return
         }
 
-        putLocked(record.copy(state = JobState.RUNNING))
+        val started = record.copy(state = JobState.RUNNING)
+        putLocked(started)
         persistLocked()
-
-        val execution = JobExecution(
-            id = JobId(record.id),
-            workerName = record.workerName,
-            inputData = record.inputData,
-            tags = record.tags,
-            runAttemptCount = record.runAttemptCount,
-            progressReporter = { data -> publishProgress(record.id, data) }
-        )
+        configuration.notify { it.onStarted(started.toJobInfo()) }
 
         val job = scope.launch {
-            val outcome = try {
-                Outcome.Finished(worker.doWork(execution))
-            } catch (cancellation: CancellationException) {
-                throw cancellation
-            } catch (error: Throwable) {
-                logger.error("Worker '${record.workerName}' threw, failing job ${record.id}", error)
-                Outcome.Finished(JobResult.Failure())
+            var failure: Throwable? = null
+            val outcome = registration.runCatchingCancellation(
+                id = JobId(record.id),
+                encodedInput = record.encodedInput,
+                tags = record.tags,
+                runAttemptCount = record.runAttemptCount,
+                onProgress = { progress -> publishProgress(record.id, progress) },
+                onError = { error ->
+                    failure = error
+                    logger.error(
+                        "Worker '${record.typeName}' threw, failing job ${record.id}",
+                        error
+                    )
+                }
+            )
+            withContext(NonCancellable) {
+                complete(record.id, Outcome.Finished(outcome), failure)
             }
-            withContext(NonCancellable) { complete(record.id, outcome) }
         }
 
         job.invokeOnCompletion { cause ->
             if (cause != null) {
                 scope.launch {
-                    withContext(NonCancellable) { complete(record.id, Outcome.Interrupted) }
+                    withContext(NonCancellable) {
+                        complete(record.id, Outcome.Interrupted, error = null)
+                    }
                 }
             }
         }
@@ -319,8 +320,10 @@ internal class JobEngine(
         running[record.id] = job
     }
 
-    private suspend fun complete(id: String, outcome: Outcome) {
+    private suspend fun complete(id: String, outcome: Outcome, error: Throwable?) {
         val now = clock.nowMillis()
+        var notification: (() -> Unit)? = null
+
         mutex.withLock {
             running.remove(id)
             val record = state.value.firstOrNull { it.id == id } ?: return@withLock
@@ -330,46 +333,87 @@ internal class JobEngine(
                 Outcome.Interrupted -> record.retrying(now, applyBackoff = false)
 
                 is Outcome.Finished -> when (val result = outcome.result) {
-                    is JobResult.Success -> record.succeeded(now, result.outputData)
+                    is WorkerOutcome.Succeeded -> record.succeeded(now, result.encodedOutput)
 
-                    is JobResult.Failure -> record.copy(
+                    is WorkerOutcome.Failed -> record.copy(
                         state = JobState.FAILED,
                         finishedAtMillis = now,
-                        outputData = result.outputData,
-                        progress = JobData.EMPTY
+                        failureReason = result.reason,
+                        progress = null
                     )
 
-                    JobResult.Retry -> record.retrying(now, applyBackoff = true)
+                    WorkerOutcome.Retry -> record.retrying(now, applyBackoff = true)
                 }
             }
 
             putLocked(updated)
             persistLocked()
+
+            val info = updated.toJobInfo()
+            val succeeded = outcome is Outcome.Finished &&
+                outcome.result is WorkerOutcome.Succeeded
+
+            notification = when {
+                outcome is Outcome.Interrupted -> {
+                    { configuration.notify { it.onStopped(info) } }
+                }
+
+                succeeded -> {
+                    { configuration.notify { it.onSucceeded(info) } }
+                }
+
+                updated.state == JobState.FAILED -> {
+                    { configuration.notify { it.onFailed(info, error) } }
+                }
+
+                else -> {
+                    {
+                        configuration.notify {
+                            it.onRetryScheduled(
+                                info,
+                                updated.earliestRunAtMillis - now
+                            )
+                        }
+                    }
+                }
+            }
         }
+
+        notification?.invoke()
         wakeUp()
     }
 
-    private suspend fun publishProgress(id: String, data: JobData) {
+    private suspend fun publishProgress(id: String, progress: JobProgress) {
         mutex.withLock {
             val record = state.value.firstOrNull { it.id == id } ?: return@withLock
             if (record.state != JobState.RUNNING) return@withLock
-            putLocked(record.copy(progress = data))
+            putLocked(record.copy(progress = progress))
         }
     }
 
-    private fun JobRecord.succeeded(nowMillis: Long, outputData: JobData): JobRecord = when {
-        isPeriodic -> nextPeriod(nowMillis).copy(outputData = outputData)
+    private fun JobRecord.succeeded(nowMillis: Long, encodedOutput: String): JobRecord = when {
+        isPeriodic -> nextPeriod(nowMillis).copy(encodedOutput = encodedOutput)
 
         else -> copy(
             state = JobState.SUCCEEDED,
             finishedAtMillis = nowMillis,
-            outputData = outputData,
-            progress = JobData.EMPTY
+            encodedOutput = encodedOutput,
+            progress = null
         )
     }
 
     private fun JobRecord.retrying(nowMillis: Long, applyBackoff: Boolean): JobRecord {
         val attempt = runAttemptCount + 1
+        if (attempt >= maxAttempts) {
+            logger.debug("Job $id ran $attempt times and is out of attempts, failing it")
+            return copy(
+                state = JobState.FAILED,
+                finishedAtMillis = nowMillis,
+                failureReason = "gave up after $attempt attempts",
+                progress = null
+            )
+        }
+
         val delay = if (applyBackoff) {
             backoffDelayMillis(backoffPolicy, backoffDelayMillis, attempt)
         } else {
@@ -379,7 +423,7 @@ internal class JobEngine(
             state = JobState.ENQUEUED,
             runAttemptCount = attempt,
             earliestRunAtMillis = nowMillis + delay,
-            progress = JobData.EMPTY
+            progress = null
         )
     }
 
@@ -387,13 +431,21 @@ internal class JobEngine(
         running.remove(id)?.cancel()
         val record = state.value.firstOrNull { it.id == id } ?: return
         if (record.state.isFinished) return
-        putLocked(
-            record.copy(
-                state = JobState.CANCELLED,
-                finishedAtMillis = nowMillis,
-                progress = JobData.EMPTY
-            )
+
+        val cancelled = record.copy(
+            state = JobState.CANCELLED,
+            finishedAtMillis = nowMillis,
+            progress = null
         )
+        putLocked(cancelled)
+        configuration.notify { it.onCancelled(cancelled.toJobInfo()) }
+    }
+
+    private fun dropLocked(id: String) {
+        running.remove(id)?.cancel()
+        val dropped = state.value.firstOrNull { it.id == id }
+        state.value = state.value.filterNot { it.id == id }
+        dropped?.let { record -> configuration.notify { it.onCancelled(record.toJobInfo()) } }
     }
 
     private fun unfinishedUniqueLocked(uniqueName: String): JobRecord? = state.value.firstOrNull {
@@ -457,6 +509,6 @@ internal class JobEngine(
 
         data object Interrupted : Outcome()
 
-        data class Finished(val result: JobResult) : Outcome()
+        data class Finished(val result: WorkerOutcome) : Outcome()
     }
 }

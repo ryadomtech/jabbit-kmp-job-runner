@@ -12,8 +12,7 @@ class TabMessageTest {
 
     @Test
     fun carriesEveryCommandBetweenTabs() {
-        val record = oneTimeJob("sync") {
-            setInputData(jobDataOf("key" to "value"))
+        val record = oneTimeJob(GreetJob, Greeting("world")) {
             addTag("tag")
         }.toRecord(uniqueName = "unique", nowMillis = 1_000)
 

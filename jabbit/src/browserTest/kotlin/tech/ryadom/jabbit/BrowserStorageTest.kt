@@ -30,4 +30,9 @@ class BrowserStorageTest {
         storage.write("stored")
         assertEquals("stored", storage.read())
     }
+
+    @Test
+    fun asksTheBrowserToKeepTheQueue() = runTest {
+        requestPersistentStorage()
+    }
 }

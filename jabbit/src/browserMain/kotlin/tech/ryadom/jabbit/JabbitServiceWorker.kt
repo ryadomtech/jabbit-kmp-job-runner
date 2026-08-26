@@ -10,28 +10,30 @@ import tech.ryadom.jabbit.internal.JsonJobRecordStorage
 import tech.ryadom.jabbit.internal.completeExtendableEvent
 import tech.ryadom.jabbit.internal.hasActiveClients
 import tech.ryadom.jabbit.internal.listenExtendableEvent
+import tech.ryadom.jabbit.internal.toOptions
 
 /**
  * Runs pending jobs inside a service worker, so they continue after the last page is closed.
  *
  * Call this from the top level of the service worker script — a Kotlin/JS or Kotlin/Wasm bundle of
- * its own — with the same [JabbitConfiguration] the page uses, because the worker has to be able to
- * build the same workers by name:
+ * its own — with the same description the page uses, because the worker has to be able to build the
+ * same workers:
  *
  * ```
  * fun main() {
- *     startJabbitServiceWorker(
- *         configuration = jabbitConfiguration {
- *             worker(SyncWorker.NAME) { SyncWorker(api) }
- *         },
- *         options = JabbitBrowserOptions(periodicSyncTag = "com.example.refresh")
- *     )
+ *     startJabbitServiceWorker {
+ *         worker(SyncJob) { SyncWorker(api) }
+ *
+ *         browser {
+ *             periodicSyncTag = "com.example.refresh"
+ *         }
+ *     }
  * }
  * ```
  *
- * [options] must match the page's: the queue is only shared when both sides use the same storage
- * and the same sync tags. [JabbitBrowserOptions.storage] must be reachable from a worker, which
- * rules out [LocalStorageJabbitStorage].
+ * The `browser { }` block must match the page's: the queue is only shared when both sides use the
+ * same storage and the same sync tags. That storage must be reachable from a worker, which rules
+ * out [LocalStorageJabbitStorage].
  *
  * What the browser actually grants:
  *
@@ -45,10 +47,11 @@ import tech.ryadom.jabbit.internal.listenExtendableEvent
  * While any page of the app is open the worker stays out of the way and lets the page run the
  * queue, so the same job is never started twice.
  */
-public fun startJabbitServiceWorker(
-    configuration: JabbitConfiguration,
-    options: JabbitBrowserOptions = JabbitBrowserOptions()
-) {
+public fun startJabbitServiceWorker(configure: JabbitScope.() -> Unit) {
+    val jabbitScope = JabbitScope().apply(configure)
+    val configuration = jabbitScope.buildConfiguration()
+    val options = jabbitScope.browserOptions.toOptions()
+
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     val deviceState = BrowserDeviceStateProvider(options)
 

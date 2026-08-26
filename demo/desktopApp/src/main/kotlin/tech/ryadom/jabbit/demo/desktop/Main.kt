@@ -34,27 +34,21 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import tech.ryadom.jabbit.JabbitDesktopOptions
+import tech.ryadom.jabbit.DesktopJabbit
 import tech.ryadom.jabbit.JobInfo
 import tech.ryadom.jabbit.JobState
-import tech.ryadom.jabbit.createJabbit
 import tech.ryadom.jabbit.demo.JabbitDemo
 import tech.ryadom.jabbit.demo.contentToString
-import tech.ryadom.jabbit.demo.demoConfiguration
+import tech.ryadom.jabbit.demo.createDemoJabbit
 
 fun main() = application {
-    val jabbit = remember {
-        createJabbit(
-            configuration = demoConfiguration(),
-            options = JabbitDesktopOptions(applicationName = "Jabbit Demo")
-        )
-    }
+    val jabbit = remember { createDemoJabbit() }
 
     val demo = remember { JabbitDemo(jabbit) }
 
     Window(
         onCloseRequest = {
-            jabbit.close()
+            (jabbit as? DesktopJabbit)?.close()
             exitApplication()
         },
         state = rememberWindowState(width = 900.dp, height = 700.dp),

@@ -20,7 +20,6 @@ import tech.ryadom.jabbit.JobRequest
 import tech.ryadom.jabbit.OneTimeJobRequest
 import tech.ryadom.jabbit.PeriodicJobRequest
 import tech.ryadom.jabbit.debug
-import tech.ryadom.jabbit.requireKnownWorker
 import tech.ryadom.jabbit.warn
 
 private const val LEADERSHIP_TIMEOUT_MILLIS = 2_000L
@@ -83,7 +82,7 @@ internal class BrowserJabbit(
 
     override suspend fun enqueue(requests: List<JobRequest>) {
         if (requests.isEmpty()) return
-        requests.forEach { configuration.requireKnownWorker(it.workerName) }
+        requests.forEach { configuration.requireKnownType(it.typeName) }
         val now = clock.nowMillis()
         val enqueued = requests.map { it.toRecord(uniqueName = null, nowMillis = now) }
         dispatch(TabMessage.Enqueue(enqueued)) { engine.enqueueRecords(enqueued) }
@@ -94,7 +93,7 @@ internal class BrowserJabbit(
         policy: ExistingJobPolicy,
         request: OneTimeJobRequest
     ) {
-        configuration.requireKnownWorker(request.workerName)
+        configuration.requireKnownType(request.typeName)
         val record = request.toRecord(uniqueName = uniqueName, nowMillis = clock.nowMillis())
         dispatch(TabMessage.EnqueueUnique(uniqueName, policy, record)) {
             engine.enqueueUniqueRecord(uniqueName, policy, record)
@@ -106,7 +105,7 @@ internal class BrowserJabbit(
         policy: ExistingPeriodicJobPolicy,
         request: PeriodicJobRequest
     ) {
-        configuration.requireKnownWorker(request.workerName)
+        configuration.requireKnownType(request.typeName)
         val record = request.toRecord(uniqueName = uniqueName, nowMillis = clock.nowMillis())
         dispatch(TabMessage.EnqueueUniquePeriodic(uniqueName, policy, record)) {
             engine.enqueueUniquePeriodicRecord(uniqueName, policy, record)

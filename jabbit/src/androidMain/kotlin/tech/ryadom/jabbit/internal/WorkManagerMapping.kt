@@ -12,9 +12,9 @@ import tech.ryadom.jabbit.Constraints
 import tech.ryadom.jabbit.ExistingJobPolicy
 import tech.ryadom.jabbit.ExistingPeriodicJobPolicy
 import tech.ryadom.jabbit.JabbitDelegatingWorker
-import tech.ryadom.jabbit.JobData
 import tech.ryadom.jabbit.JobId
 import tech.ryadom.jabbit.JobInfo
+import tech.ryadom.jabbit.JobProgress
 import tech.ryadom.jabbit.JobRequest
 import tech.ryadom.jabbit.JobState
 import tech.ryadom.jabbit.NetworkType
@@ -28,66 +28,14 @@ import androidx.work.Constraints as WorkConstraints
 import androidx.work.NetworkType as WorkNetworkType
 
 internal const val JABBIT_TAG = "${RESERVED_TAG_PREFIX}job"
-
-internal const val WORKER_TAG_PREFIX = "${RESERVED_TAG_PREFIX}worker."
-
+internal const val TYPE_TAG_PREFIX = "${RESERVED_TAG_PREFIX}type."
 internal const val UNIQUE_TAG_PREFIX = "${RESERVED_TAG_PREFIX}unique."
-
-internal const val WORKER_NAME_KEY = "${RESERVED_TAG_PREFIX}workerName"
-
-private const val VALUE_KEY_PREFIX = "${RESERVED_TAG_PREFIX}value."
-
-internal fun JobData.putInto(builder: Data.Builder): Data.Builder {
-    values.forEach { (key, value) ->
-        val dataKey = VALUE_KEY_PREFIX + key
-        when (value) {
-            is JobDataValue.BooleanValue -> builder.putBoolean(dataKey, value.value)
-
-            is JobDataValue.IntValue -> builder.putInt(dataKey, value.value)
-
-            is JobDataValue.LongValue -> builder.putLong(dataKey, value.value)
-
-            is JobDataValue.FloatValue -> builder.putFloat(dataKey, value.value)
-
-            is JobDataValue.DoubleValue -> builder.putDouble(dataKey, value.value)
-
-            is JobDataValue.StringValue -> builder.putString(dataKey, value.value)
-
-            is JobDataValue.StringListValue -> builder.putStringArray(
-                dataKey,
-                value.value.toTypedArray()
-            )
-        }
-    }
-
-    return builder
-}
-
-internal fun JobData.toWorkData(): Data = putInto(Data.Builder()).build()
-
-internal fun Data.toJobData(): JobData {
-    val values = buildMap {
-        keyValueMap.forEach { (key, raw) ->
-            if (!key.startsWith(VALUE_KEY_PREFIX)) return@forEach
-            val value = when (raw) {
-                is Boolean -> JobDataValue.BooleanValue(raw)
-                is Int -> JobDataValue.IntValue(raw)
-                is Long -> JobDataValue.LongValue(raw)
-                is Float -> JobDataValue.FloatValue(raw)
-                is Double -> JobDataValue.DoubleValue(raw)
-                is String -> JobDataValue.StringValue(raw)
-                is Array<*> -> JobDataValue.StringListValue(raw.filterIsInstance<String>())
-                else -> null
-            }
-
-            if (value != null) {
-                put(key.removePrefix(VALUE_KEY_PREFIX), value)
-            }
-        }
-    }
-
-    return JobData(values)
-}
+internal const val TYPE_NAME_KEY = "${RESERVED_TAG_PREFIX}typeName"
+internal const val MAX_ATTEMPTS_KEY = "${RESERVED_TAG_PREFIX}maxAttempts"
+internal const val INPUT_KEY = "${RESERVED_TAG_PREFIX}input"
+internal const val OUTPUT_KEY = "${RESERVED_TAG_PREFIX}output"
+internal const val FAILURE_KEY = "${RESERVED_TAG_PREFIX}failure"
+internal const val PROGRESS_KEY = "${RESERVED_TAG_PREFIX}progress"
 
 internal fun Constraints.toWorkConstraints(): WorkConstraints = WorkConstraints.Builder()
     .setRequiredNetworkType(requiredNetworkType.toWorkNetworkType())
@@ -132,11 +80,11 @@ internal fun OneTimeJobRequest.toWorkRequest(uniqueName: String?): OneTimeWorkRe
 
 internal fun PeriodicJobRequest.toWorkRequest(uniqueName: String?): PeriodicWorkRequest =
     PeriodicWorkRequest.Builder(
-        workerClass = JabbitDelegatingWorker::class.java,
-        repeatInterval = repeatInterval.inWholeMilliseconds,
-        repeatIntervalTimeUnit = TimeUnit.MILLISECONDS,
-        flexInterval = flexInterval.inWholeMilliseconds,
-        flexIntervalTimeUnit = TimeUnit.MILLISECONDS
+        JabbitDelegatingWorker::class.java,
+        repeatInterval.inWholeMilliseconds,
+        TimeUnit.MILLISECONDS,
+        flexInterval.inWholeMilliseconds,
+        TimeUnit.MILLISECONDS
     )
         .applyCommon(this, uniqueName)
         .build()
@@ -152,8 +100,10 @@ private fun <B : WorkRequest.Builder<B, *>> B.applyCommon(
 ): B = apply {
     setId(UUID.fromString(request.id.value))
     setInputData(
-        request.inputData
-            .putInto(Data.Builder().putString(WORKER_NAME_KEY, request.workerName))
+        Data.Builder()
+            .putString(TYPE_NAME_KEY, request.typeName)
+            .putString(INPUT_KEY, request.encodedInput)
+            .putInt(MAX_ATTEMPTS_KEY, request.maxAttempts)
             .build()
     )
     setConstraints(request.constraints.toWorkConstraints())
@@ -166,15 +116,28 @@ private fun <B : WorkRequest.Builder<B, *>> B.applyCommon(
         setInitialDelay(request.initialDelay.inWholeMilliseconds, TimeUnit.MILLISECONDS)
     }
     addTag(JABBIT_TAG)
-    addTag(WORKER_TAG_PREFIX + request.workerName)
+    addTag(TYPE_TAG_PREFIX + request.typeName)
     uniqueName?.let { addTag(UNIQUE_TAG_PREFIX + it) }
     request.tags.forEach { addTag(it) }
 }
 
+internal fun JobRequest.toEnqueuedJobInfo(uniqueName: String?): JobInfo = JobInfo(
+    id = id,
+    typeName = typeName,
+    state = JobState.ENQUEUED,
+    tags = tags,
+    uniqueName = uniqueName,
+    progress = null,
+    failureReason = null,
+    runAttemptCount = 0,
+    nextScheduleTimeMillis = null,
+    encodedOutput = null
+)
+
 internal fun WorkInfo.toJobInfo(): JobInfo = JobInfo(
     id = JobId(id.toString()),
-    workerName = tags.firstOrNull { it.startsWith(WORKER_TAG_PREFIX) }
-        ?.removePrefix(WORKER_TAG_PREFIX)
+    typeName = tags.firstOrNull { it.startsWith(TYPE_TAG_PREFIX) }
+        ?.removePrefix(TYPE_TAG_PREFIX)
         .orEmpty(),
     state = state.toJobState(),
     tags = tags.filterNotTo(mutableSetOf()) {
@@ -182,10 +145,13 @@ internal fun WorkInfo.toJobInfo(): JobInfo = JobInfo(
     },
     uniqueName = tags.firstOrNull { it.startsWith(UNIQUE_TAG_PREFIX) }
         ?.removePrefix(UNIQUE_TAG_PREFIX),
-    outputData = outputData.toJobData(),
-    progress = progress.toJobData(),
+    progress = progress.getString(PROGRESS_KEY)?.let {
+        decodePayload(JobProgress.serializer(), it)
+    },
+    failureReason = outputData.getString(FAILURE_KEY),
     runAttemptCount = runAttemptCount,
-    nextScheduleTimeMillis = nextScheduleTimeMillis.takeIf { it != Long.MAX_VALUE }
+    nextScheduleTimeMillis = nextScheduleTimeMillis.takeIf { it != Long.MAX_VALUE },
+    encodedOutput = outputData.getString(OUTPUT_KEY)
 )
 
 internal fun WorkInfo.State.toJobState(): JobState = when (this) {

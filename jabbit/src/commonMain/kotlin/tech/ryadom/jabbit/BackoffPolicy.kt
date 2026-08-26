@@ -6,6 +6,10 @@ import kotlin.time.Duration.Companion.seconds
 
 /**
  * How the delay before a retry grows after a job returns [JobResult.Retry] or is interrupted.
+ *
+ * Whatever the policy computes, the delay is stretched by a random amount of up to a fifth on top,
+ * so that jobs which failed together — a network outage usually takes them all down at once — come
+ * back spread out instead of hammering the same second.
  */
 public enum class BackoffPolicy {
 

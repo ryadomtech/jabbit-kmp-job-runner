@@ -1,10 +1,12 @@
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.kotlinMultiplatformLibrary)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.publishing)
+    alias(libs.plugins.dokka)
 }
 
 kotlin {
@@ -14,14 +16,21 @@ kotlin {
 
     jvmToolchain(21)
 
-    jvm()
+    jvm {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
+            freeCompilerArgs.add("-Xjdk-release=11")
+        }
+    }
 
     android {
         namespace = "tech.ryadom.jabbit"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
 
-        withHostTest {}
+        withHostTest {
+            isIncludeAndroidResources = true
+        }
     }
 
     listOf(
@@ -47,9 +56,6 @@ kotlin {
     sourceSets {
         val standaloneMain = create("standaloneMain") {
             dependsOn(commonMain.get())
-            dependencies {
-                implementation(libs.kotlinx.serialization.json)
-            }
         }
 
         val standaloneTest = create("standaloneTest") {
@@ -80,7 +86,8 @@ kotlin {
 
         commonMain.dependencies {
             api(libs.kotlinx.coroutines.core)
-            implementation(libs.kotlinx.serialization.core)
+            api(libs.kotlinx.serialization.core)
+            implementation(libs.kotlinx.serialization.json)
         }
 
         androidMain.dependencies {
@@ -91,6 +98,13 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
+        }
+
+        getByName("androidHostTest").dependencies {
+            implementation(libs.junit)
+            implementation(libs.robolectric)
+            implementation(libs.androidx.test.core)
+            implementation(libs.androidx.work.testing)
         }
     }
 }
@@ -103,27 +117,27 @@ mavenPublishing {
     coordinates(
         groupId = "tech.ryadom",
         artifactId = "jabbit",
-        version = "1.1.0"
+        version = "2.0.0"
     )
 
     pom {
         name.set("Jabbit")
-        description.set("Kotlin Multiplatform job runner for Android, iOS, the desktop and the browser, with an API modelled after androidx.work.WorkManager.")
+        description.set("Kotlin Multiplatform job runner for Android, iOS, the desktop and the browser, with an API like in androidx.work.WorkManager.")
         inceptionYear.set("2026")
         url.set("https://github.com/ryadomtech/jabbit-kmp-job-runner")
 
         licenses {
             license {
-                name.set("The Apache License, Version 2.0")
-                url.set("http://www.apache.org/licenses/LICENSE-2.0")
-                distribution.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                name.set("MIT License")
+                url.set("https://opensource.org/license/mit")
+                distribution.set("https://opensource.org/license/mit")
             }
         }
 
         developers {
             developer {
                 id.set("adkozlovskiy")
-                name.set("Alexey Kozlovsky")
+                name.set("Aleksei Kozlovskiy")
                 email.set("adkozlovskiy@gmail.com")
             }
         }
@@ -136,3 +150,25 @@ mavenPublishing {
     }
 }
 
+dokka {
+    moduleName.set("Jabbit")
+
+    dokkaSourceSets.configureEach {
+        includes.from("module.md")
+
+        perPackageOption {
+            matchingRegex.set(".*\\.internal.*")
+            suppress.set(true)
+        }
+
+        sourceLink {
+            localDirectory.set(file("src"))
+            remoteUrl("https://github.com/ryadomtech/jabbit-kmp-job-runner/tree/main/jabbit/src")
+            remoteLineSuffix.set("#L")
+        }
+    }
+
+    dokkaPublications.html {
+        outputDirectory.set(rootProject.layout.buildDirectory.dir("dokka/html"))
+    }
+}

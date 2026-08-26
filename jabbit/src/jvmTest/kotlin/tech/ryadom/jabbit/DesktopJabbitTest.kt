@@ -6,7 +6,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
-import java.nio.file.Path
 import kotlin.io.path.createTempDirectory
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -19,18 +18,18 @@ class DesktopJabbitTest {
     @Test
     fun runsAJobAndReportsItsOutcome() = runTest {
         val finished = CompletableDeferred<String>()
-        val jabbit = newJabbit(createTempDirectory("jabbit")) {
-            worker("greet") {
+        val jabbit = newJabbit {
+            worker(GreetJob) {
                 JabbitWorker { job ->
-                    val greeting = "hello ${job.inputData.getString("name")}"
+                    val greeting = "hello ${job.input.name}"
                     finished.complete(greeting)
-                    JobResult.success(jobDataOf("greeting" to greeting))
+                    JobResult.success(greeting)
                 }
             }
         }
 
         try {
-            val request = oneTimeJob("greet") { setInputData(jobDataOf("name" to "desktop")) }
+            val request = oneTimeJob(GreetJob, Greeting("desktop"))
             jabbit.enqueue(request)
 
             withContext(Dispatchers.Default) {
@@ -40,10 +39,7 @@ class DesktopJabbitTest {
                 }
             }
 
-            assertEquals(
-                "hello desktop",
-                jabbit.getJobInfo(request.id)?.outputData?.getString("greeting")
-            )
+            assertEquals("hello desktop", jabbit.getJobInfo(request.id)?.output(GreetJob))
         } finally {
             jabbit.close()
         }
@@ -51,14 +47,13 @@ class DesktopJabbitTest {
 
     @Test
     fun picksUpAnUnfinishedQueueOnTheNextStart() = runTest {
-        val directory = createTempDirectory("jabbit")
-
-        val first = newJabbit(directory) {
-            worker("flaky") { JabbitWorker { JobResult.retry() } }
+        val directory = createTempDirectory("jabbit").toString()
+        val request = oneTimeJob(FlakyJob) {
+            setBackoffCriteriaMillis(BackoffPolicy.LINEAR, 60_000)
         }
 
-        val request = oneTimeJob("flaky") {
-            setBackoffCriteriaMillis(BackoffPolicy.LINEAR, 60_000)
+        val first = newJabbit(directory) {
+            worker(FlakyJob) { JabbitWorker { JobResult.retry() } }
         }
 
         try {
@@ -73,15 +68,13 @@ class DesktopJabbitTest {
         }
 
         val second = newJabbit(directory) {
-            worker("flaky") { JabbitWorker { JobResult.retry() } }
+            worker(FlakyJob) { JabbitWorker { JobResult.retry() } }
         }
 
         try {
             withContext(Dispatchers.Default) {
                 withTimeout(20.seconds) {
-                    awaitState(second, request.id, JobState.ENQUEUED) {
-                        it.runAttemptCount == 1
-                    }
+                    awaitState(second, request.id, JobState.ENQUEUED) { it.runAttemptCount == 1 }
                 }
             }
         } finally {
@@ -91,12 +84,12 @@ class DesktopJabbitTest {
 
     @Test
     fun waitsForConstraintsItCannotSatisfy() = runTest {
-        val jabbit = newJabbit(createTempDirectory("jabbit")) {
-            worker("never") { JabbitWorker { JobResult.success() } }
+        val jabbit = newJabbit {
+            worker(NeverJob) { JabbitWorker { JobResult.success() } }
         }
 
         try {
-            val request = oneTimeJob("never") {
+            val request = oneTimeJob(NeverJob) {
                 setConstraints(constraints { requiredNetworkType = NetworkType.METERED })
             }
             jabbit.enqueue(request)
@@ -116,19 +109,28 @@ class DesktopJabbitTest {
 
     @Test
     fun refusesToShareAStorageDirectoryWithAnotherInstance() {
-        val directory = createTempDirectory("jabbit")
-        val first = newJabbit(directory) { worker("noop") { JabbitWorker { JobResult.success() } } }
+        val directory = createTempDirectory("jabbit").toString()
+        val first = createJabbit(directory, singleInstance = true)
 
         try {
             val failure = assertFailsWith<IllegalStateException> {
-                newJabbit(directory) { worker("noop") { JabbitWorker { JobResult.success() } } }
+                createJabbit(directory, singleInstance = true)
             }
             assertTrue(failure.message.orEmpty().contains("Another process"))
         } finally {
             first.close()
         }
 
-        newJabbit(directory) { worker("noop") { JabbitWorker { JobResult.success() } } }.close()
+        createJabbit(directory, singleInstance = true).close()
+    }
+
+    @Test
+    fun refusesToBuildOnTheDesktopWithoutAnApplicationName() {
+        val failure = assertFailsWith<IllegalStateException> {
+            jabbit { worker(OkJob) { JabbitWorker { JobResult.success(1) } } }
+        }
+
+        assertTrue(failure.message.orEmpty().contains("applicationName"))
     }
 
     private suspend fun awaitState(
@@ -145,13 +147,25 @@ class DesktopJabbitTest {
     }
 
     private fun newJabbit(
-        directory: Path,
-        configure: JabbitConfiguration.Builder.() -> Unit
-    ): DesktopJabbit = createJabbit(
-        configuration = JabbitConfiguration.Builder().apply(configure).build(),
-        options = JabbitDesktopOptions(
-            applicationName = "jabbit-test",
+        directory: String = createTempDirectory("jabbit").toString(),
+        configure: JabbitScope.() -> Unit
+    ): DesktopJabbit = jabbit {
+        configure()
+        desktop {
+            applicationName = "jabbit-test"
             storageDirectory = directory
-        )
-    )
+            singleInstanceLock = false
+            readPowerSource = false
+        }
+    } as DesktopJabbit
+
+    private fun createJabbit(directory: String, singleInstance: Boolean): DesktopJabbit = jabbit {
+        worker(OkJob) { JabbitWorker { JobResult.success(1) } }
+        desktop {
+            applicationName = "jabbit-test"
+            storageDirectory = directory
+            singleInstanceLock = singleInstance
+            readPowerSource = false
+        }
+    } as DesktopJabbit
 }

@@ -2,27 +2,11 @@ package tech.ryadom.jabbit.internal
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.builtins.MapSerializer
-import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import tech.ryadom.jabbit.Constraints
-import tech.ryadom.jabbit.JobData
 import tech.ryadom.jabbit.NetworkType
-
-internal object JobDataSerializer : KSerializer<JobData> {
-
-    private val delegate = MapSerializer(String.serializer(), JobDataValue.serializer())
-
-    override val descriptor: SerialDescriptor = delegate.descriptor
-
-    override fun serialize(encoder: Encoder, value: JobData) {
-        delegate.serialize(encoder, value.values)
-    }
-
-    override fun deserialize(decoder: Decoder): JobData = JobData(delegate.deserialize(decoder))
-}
 
 @Serializable
 private class ConstraintsSurrogate(
