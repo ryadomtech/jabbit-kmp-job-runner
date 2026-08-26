@@ -1,5 +1,4 @@
 # Jabbit
-<img width="390" height="219" alt="telegram-cloud-photo-size-2-5219803639394804184-x" src="https://github.com/user-attachments/assets/e2cc28fa-63d2-4368-8e55-39e94e595b42" />
 
 Kotlin Multiplatform job runner for Android, iOS, the desktop and the browser, with an API
 like in `androidx.work.WorkManager`.
