@@ -9,6 +9,8 @@ plugins {
     alias(libs.plugins.dokka)
 }
 
+version = "2.0.0"
+
 kotlin {
     applyDefaultHierarchyTemplate()
 
@@ -117,7 +119,7 @@ mavenPublishing {
     coordinates(
         groupId = "tech.ryadom",
         artifactId = "jabbit",
-        version = "2.0.0"
+        version = project.version.toString()
     )
 
     pom {
@@ -152,6 +154,7 @@ mavenPublishing {
 
 dokka {
     moduleName.set("Jabbit")
+    moduleVersion.set(project.version.toString())
 
     dokkaSourceSets.configureEach {
         includes.from("module.md")
@@ -170,5 +173,12 @@ dokka {
 
     dokkaPublications.html {
         outputDirectory.set(rootProject.layout.buildDirectory.dir("dokka/html"))
+    }
+
+    pluginsConfiguration.html {
+        customAssets.from("docs/logo-icon.svg")
+        customStyleSheets.from("docs/logo-styles.css")
+        homepageLink.set("https://github.com/ryadomtech/jabbit-kmp-job-runner")
+        footerMessage.set("© 2026 Ryadom Tech · MIT")
     }
 }

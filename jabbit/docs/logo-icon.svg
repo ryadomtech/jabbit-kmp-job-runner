@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" fill="none">
+  <defs>
+    <linearGradient id="jabbit-mark" x1="10" y1="4" x2="38" y2="44" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8B5CF6"/>
+      <stop offset="0.55" stop-color="#A855F7"/>
+      <stop offset="1" stop-color="#E040FB"/>
+    </linearGradient>
+    <filter id="jabbit-glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="2"/>
+    </filter>
+  </defs>
+  <path d="M14.5 4.5 C14.5 12 17 17 19.56 20.48 A10.5 10.5 0 1 0 28.44 20.48 C31 17 33.5 12 33.5 4.5"
+        stroke="#C026F3" stroke-width="4.5" stroke-linecap="round"
+        filter="url(#jabbit-glow)" opacity="0.5"/>
+  <path d="M14.5 4.5 C14.5 12 17 17 19.56 20.48 A10.5 10.5 0 1 0 28.44 20.48 C31 17 33.5 12 33.5 4.5"
+        stroke="url(#jabbit-mark)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
