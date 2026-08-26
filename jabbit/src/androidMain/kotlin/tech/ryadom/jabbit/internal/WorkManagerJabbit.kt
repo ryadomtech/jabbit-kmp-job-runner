@@ -11,9 +11,9 @@ import tech.ryadom.jabbit.JabbitConfiguration
 import tech.ryadom.jabbit.JobId
 import tech.ryadom.jabbit.JobInfo
 import tech.ryadom.jabbit.JobRequest
+import tech.ryadom.jabbit.JobState
 import tech.ryadom.jabbit.OneTimeJobRequest
 import tech.ryadom.jabbit.PeriodicJobRequest
-import tech.ryadom.jabbit.requireKnownWorker
 import java.util.UUID
 
 internal class WorkManagerJabbit(context: Context, private val configuration: JabbitConfiguration) :
@@ -30,7 +30,10 @@ internal class WorkManagerJabbit(context: Context, private val configuration: Ja
             return
         }
 
-        requests.forEach { configuration.requireKnownWorker(it.workerName) }
+        requests.forEach { configuration.requireKnownType(it.typeName) }
+        requests.forEach { request ->
+            configuration.notify { it.onEnqueued(request.toEnqueuedJobInfo(uniqueName = null)) }
+        }
         workManager.enqueue(requests.map { it.toWorkRequest(uniqueName = null) }).result.await()
     }
 
@@ -39,7 +42,8 @@ internal class WorkManagerJabbit(context: Context, private val configuration: Ja
         policy: ExistingJobPolicy,
         request: OneTimeJobRequest
     ) {
-        configuration.requireKnownWorker(request.workerName)
+        configuration.requireKnownType(request.typeName)
+        configuration.notify { it.onEnqueued(request.toEnqueuedJobInfo(uniqueName)) }
         workManager.enqueueUniqueWork(
             uniqueName,
             policy.toExistingWorkPolicy(),
@@ -52,7 +56,8 @@ internal class WorkManagerJabbit(context: Context, private val configuration: Ja
         policy: ExistingPeriodicJobPolicy,
         request: PeriodicJobRequest
     ) {
-        configuration.requireKnownWorker(request.workerName)
+        configuration.requireKnownType(request.typeName)
+        configuration.notify { it.onEnqueued(request.toEnqueuedJobInfo(uniqueName)) }
         workManager.enqueueUniquePeriodicWork(
             uniqueName,
             policy.toExistingPeriodicWorkPolicy(),
@@ -61,19 +66,33 @@ internal class WorkManagerJabbit(context: Context, private val configuration: Ja
     }
 
     override suspend fun cancelJob(id: JobId) {
+        val cancelled = listOfNotNull(getJobInfo(id))
         workManager.cancelWorkById(UUID.fromString(id.value)).result.await()
+        notifyCancelled(cancelled)
     }
 
     override suspend fun cancelJobsByTag(tag: String) {
+        val cancelled = getJobInfosByTag(tag)
         workManager.cancelAllWorkByTag(tag).result.await()
+        notifyCancelled(cancelled)
     }
 
     override suspend fun cancelUniqueJob(uniqueName: String) {
+        val cancelled = getJobInfosForUniqueJob(uniqueName)
         workManager.cancelUniqueWork(uniqueName).result.await()
+        notifyCancelled(cancelled)
     }
 
     override suspend fun cancelAllJobs() {
+        val cancelled = getJobInfosByTag(JABBIT_TAG)
         workManager.cancelAllWorkByTag(JABBIT_TAG).result.await()
+        notifyCancelled(cancelled)
+    }
+
+    private fun notifyCancelled(jobs: List<JobInfo>) {
+        jobs.filterNot { it.state.isFinished }.forEach { job ->
+            configuration.notify { it.onCancelled(job.copy(state = JobState.CANCELLED)) }
+        }
     }
 
     override suspend fun pruneFinishedJobs() {

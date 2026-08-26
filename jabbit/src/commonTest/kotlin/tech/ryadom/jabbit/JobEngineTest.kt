@@ -28,23 +28,23 @@ class JobEngineTest {
     @Test
     fun runsAOneTimeJobAndKeepsItsOutput() = runTest {
         val engine = engine {
-            worker("ok") { JabbitWorker { JobResult.success(jobDataOf("answer" to 42)) } }
+            worker(OkJob) { JabbitWorker { JobResult.success(42) } }
         }
         engine.start()
-        engine.enqueue(listOf(oneTimeJob("ok")))
+        engine.enqueue(listOf(oneTimeJob(OkJob)))
         settle()
 
         val record = engine.snapshot().single()
         assertEquals(JobState.SUCCEEDED, record.state)
-        assertEquals(42, record.outputData.getInt("answer"))
+        assertEquals("42", record.encodedOutput)
         assertEquals(0, record.runAttemptCount)
     }
 
     @Test
     fun honoursTheInitialDelay() = runTest {
-        val engine = engine { worker("ok") { JabbitWorker { JobResult.success() } } }
+        val engine = engine { worker(OkJob) { JabbitWorker { JobResult.success(1) } } }
         engine.start()
-        engine.enqueue(listOf(oneTimeJob("ok") { setInitialDelay(30.seconds) }))
+        engine.enqueue(listOf(oneTimeJob(OkJob) { setInitialDelay(30.seconds) }))
 
         advanceTimeBy(10.seconds)
         runCurrent()
@@ -59,7 +59,7 @@ class JobEngineTest {
     fun retriesWithBackoffAndCountsAttempts() = runTest {
         val attempts = mutableListOf<Int>()
         val engine = engine {
-            worker("flaky") {
+            worker(FlakyJob) {
                 JabbitWorker { job ->
                     attempts += job.runAttemptCount
                     if (job.runAttemptCount < 2) JobResult.retry() else JobResult.success()
@@ -69,7 +69,7 @@ class JobEngineTest {
         engine.start()
         engine.enqueue(
             listOf(
-                oneTimeJob("flaky") {
+                oneTimeJob(FlakyJob) {
                     setBackoffCriteria(BackoffPolicy.LINEAR, 10.seconds)
                 }
             )
@@ -90,26 +90,74 @@ class JobEngineTest {
     }
 
     @Test
-    fun failsPermanentlyOnFailureAndOnThrow() = runTest {
+    fun givesUpAfterTheAllowedNumberOfAttempts() = runTest {
+        var runs = 0
         val engine = engine {
-            worker("failing") {
-                JabbitWorker { JobResult.failure(jobDataOf("reason" to "nope")) }
+            worker(FlakyJob) {
+                JabbitWorker {
+                    runs++
+                    JobResult.retry()
+                }
             }
-            worker("throwing") { JabbitWorker { error("boom") } }
         }
         engine.start()
-        engine.enqueue(listOf(oneTimeJob("failing"), oneTimeJob("throwing")))
+        engine.enqueue(
+            listOf(
+                oneTimeJob(FlakyJob) {
+                    setMaxAttempts(3)
+                    setBackoffCriteria(BackoffPolicy.LINEAR, 10.seconds)
+                }
+            )
+        )
+
+        advanceTimeBy(2.minutes)
+        runCurrent()
+
+        assertEquals(3, runs)
+        assertEquals(JobState.FAILED, engine.snapshot().single().state)
+    }
+
+    @Test
+    fun retriesWithoutALimitByDefault() = runTest {
+        var runs = 0
+        val engine = engine {
+            worker(FlakyJob) {
+                JabbitWorker {
+                    runs++
+                    JobResult.retry()
+                }
+            }
+        }
+        engine.start()
+        engine.enqueue(
+            listOf(oneTimeJob(FlakyJob) { setBackoffCriteria(BackoffPolicy.LINEAR, 10.seconds) })
+        )
+
+        advanceTimeBy(2.minutes)
+        runCurrent()
+
+        assertTrue(runs > 3, "expected more than three attempts, got $runs")
+        assertEquals(JobState.ENQUEUED, engine.snapshot().single().state)
+    }
+
+    @Test
+    fun failsPermanentlyOnFailureAndOnThrow() = runTest {
+        val engine = engine {
+            worker(FailingJob) {
+                JabbitWorker { JobResult.failure("nope") }
+            }
+            worker(ThrowingJob) { JabbitWorker { error("boom") } }
+        }
+        engine.start()
+        engine.enqueue(listOf(oneTimeJob(FailingJob), oneTimeJob(ThrowingJob)))
         settle()
 
-        val states = engine.snapshot().associate { it.workerName to it.state }
+        val states = engine.snapshot().associate { it.typeName to it.state }
         assertEquals(JobState.FAILED, states["failing"])
         assertEquals(JobState.FAILED, states["throwing"])
         assertEquals(
             "nope",
-            engine.snapshot()
-                .first { it.workerName == "failing" }
-                .outputData
-                .getString("reason")
+            engine.snapshot().first { it.typeName == "failing" }.failureReason
         )
     }
 
@@ -117,12 +165,12 @@ class JobEngineTest {
     fun waitsUntilConstraintsAreSatisfied() = runTest {
         val device = FakeDeviceStateProvider(DeviceState(networkConnected = false))
         val engine = engine(deviceState = device) {
-            worker("upload") { JabbitWorker { JobResult.success() } }
+            worker(UploadJob) { JabbitWorker { JobResult.success() } }
         }
         engine.start()
         engine.enqueue(
             listOf(
-                oneTimeJob("upload") {
+                oneTimeJob(UploadJob) {
                     setConstraints(constraints { requiredNetworkType = NetworkType.CONNECTED })
                 }
             )
@@ -142,7 +190,7 @@ class JobEngineTest {
         val started = CompletableDeferred<Unit>()
         var finished = false
         val engine = engine {
-            worker("slow") {
+            worker(SlowJob) {
                 JabbitWorker {
                     started.complete(Unit)
                     delay(1.hours)
@@ -152,7 +200,7 @@ class JobEngineTest {
             }
         }
         engine.start()
-        val request = oneTimeJob("slow")
+        val request = oneTimeJob(SlowJob)
         engine.enqueue(listOf(request))
 
         advanceTimeBy(1.seconds)
@@ -172,7 +220,7 @@ class JobEngineTest {
     fun cancelsByTagAndByUniqueName() = runTest {
         val engine =
             engine {
-                worker("slow") {
+                worker(SlowJob) {
                     JabbitWorker {
                         delay(1.hours)
                         JobResult.success()
@@ -180,8 +228,8 @@ class JobEngineTest {
                 }
             }
         engine.start()
-        engine.enqueue(listOf(oneTimeJob("slow") { addTag("group") }))
-        engine.enqueueUnique("named", ExistingJobPolicy.KEEP, oneTimeJob("slow"))
+        engine.enqueue(listOf(oneTimeJob(SlowJob) { addTag("group") }))
+        engine.enqueueUnique("named", ExistingJobPolicy.KEEP, oneTimeJob(SlowJob))
         settle()
 
         engine.cancelByTag("group")
@@ -195,7 +243,7 @@ class JobEngineTest {
     fun keepsOrReplacesUniqueJobs() = runTest {
         val engine =
             engine {
-                worker("slow") {
+                worker(SlowJob) {
                     JabbitWorker {
                         delay(1.hours)
                         JobResult.success()
@@ -204,27 +252,27 @@ class JobEngineTest {
             }
         engine.start()
 
-        val first = oneTimeJob("slow")
+        val first = oneTimeJob(SlowJob)
         engine.enqueueUnique("sync", ExistingJobPolicy.KEEP, first)
-        engine.enqueueUnique("sync", ExistingJobPolicy.KEEP, oneTimeJob("slow"))
+        engine.enqueueUnique("sync", ExistingJobPolicy.KEEP, oneTimeJob(SlowJob))
         settle()
         assertEquals(listOf(first.id.value), engine.snapshot().map { it.id })
 
-        val replacement = oneTimeJob("slow")
+        val replacement = oneTimeJob(SlowJob)
         engine.enqueueUnique("sync", ExistingJobPolicy.REPLACE, replacement)
         settle()
 
         val states = engine.snapshot().associate { it.id to it.state }
-        assertEquals(JobState.CANCELLED, states[first.id.value])
+        assertNull(states[first.id.value], "a replaced job stops being observable")
         assertEquals(JobState.RUNNING, states[replacement.id.value])
     }
 
     @Test
     fun updatesAUniquePeriodicJobWithoutRestartingItsPeriod() = runTest {
-        val engine = engine { worker("sync") { JabbitWorker { JobResult.success() } } }
+        val engine = engine { worker(SyncJob) { JabbitWorker { JobResult.success() } } }
         engine.start()
 
-        val original = periodicJob("sync", repeatInterval = 1.hours) {
+        val original = periodicJob(SyncJob, Greeting("first"), repeatInterval = 1.hours) {
             setInitialDelay(30.minutes)
         }
         engine.enqueueUniquePeriodic("sync", ExistingPeriodicJobPolicy.KEEP, original)
@@ -234,16 +282,14 @@ class JobEngineTest {
         engine.enqueueUniquePeriodic(
             uniqueName = "sync",
             policy = ExistingPeriodicJobPolicy.UPDATE,
-            request = periodicJob("sync", repeatInterval = 2.hours) {
-                setInputData(jobDataOf("updated" to true))
-            }
+            request = periodicJob(SyncJob, Greeting("second"), repeatInterval = 2.hours)
         )
         settle()
 
         val record = engine.snapshot().single()
         assertEquals(original.id.value, record.id)
         assertEquals(scheduledAt, record.earliestRunAtMillis)
-        assertEquals(true, record.inputData.getBoolean("updated"))
+        assertEquals("{\"name\":\"second\"}", record.encodedInput)
         assertEquals(2.hours.inWholeMilliseconds, record.repeatIntervalMillis)
     }
 
@@ -251,7 +297,7 @@ class JobEngineTest {
     fun reschedulesPeriodicJobsAfterEverySuccess() = runTest {
         var runs = 0
         val engine = engine {
-            worker("beat") {
+            worker(BeatJob) {
                 JabbitWorker {
                     runs++
                     JobResult.success()
@@ -259,7 +305,7 @@ class JobEngineTest {
             }
         }
         engine.start()
-        engine.enqueue(listOf(periodicJob("beat", repeatInterval = 15.minutes)))
+        engine.enqueue(listOf(periodicJob(BeatJob, repeatInterval = 15.minutes)))
 
         advanceTimeBy(1.seconds)
         runCurrent()
@@ -279,7 +325,7 @@ class JobEngineTest {
     fun stopsRepeatingWhenAPeriodicJobFails() = runTest {
         var runs = 0
         val engine = engine {
-            worker("beat") {
+            worker(BeatJob) {
                 JabbitWorker {
                     runs++
                     JobResult.failure()
@@ -287,7 +333,7 @@ class JobEngineTest {
             }
         }
         engine.start()
-        engine.enqueue(listOf(periodicJob("beat", repeatInterval = 15.minutes)))
+        engine.enqueue(listOf(periodicJob(BeatJob, repeatInterval = 15.minutes)))
 
         advanceTimeBy(2.hours)
         runCurrent()
@@ -300,8 +346,8 @@ class JobEngineTest {
     fun limitsHowManyJobsRunAtOnce() = runTest {
         var peak = 0
         var active = 0
-        val engine = engine(maxConcurrentJobs = 2) {
-            worker("slow") {
+        val engine = engine(concurrency = 2) {
+            worker(SlowJob) {
                 JabbitWorker {
                     active++
                     peak = maxOf(peak, active)
@@ -312,7 +358,7 @@ class JobEngineTest {
             }
         }
         engine.start()
-        engine.enqueue(List(5) { oneTimeJob("slow") })
+        engine.enqueue(List(5) { oneTimeJob(SlowJob) })
 
         advanceTimeBy(2.minutes)
         runCurrent()
@@ -324,31 +370,31 @@ class JobEngineTest {
     @Test
     fun publishesProgressWhileRunning() = runTest {
         val engine = engine {
-            worker("reporting") {
+            worker(ReportingJob) {
                 JabbitWorker { job ->
-                    job.setProgress(jobDataOf("percent" to 50))
+                    job.setProgress(JobProgress(fraction = 0.5f))
                     delay(10.seconds)
                     JobResult.success()
                 }
             }
         }
         engine.start()
-        engine.enqueue(listOf(oneTimeJob("reporting")))
+        engine.enqueue(listOf(oneTimeJob(ReportingJob)))
 
         advanceTimeBy(1.seconds)
         runCurrent()
-        assertEquals(50, engine.snapshot().single().progress.getInt("percent"))
+        assertEquals(0.5f, engine.snapshot().single().progress?.fraction)
 
         advanceTimeBy(20.seconds)
         runCurrent()
-        assertTrue(engine.snapshot().single().progress.isEmpty())
+        assertNull(engine.snapshot().single().progress)
     }
 
     @Test
     fun persistsJobsAndRecoversInterruptedOnes() = runTest {
         val storage = InMemoryJobRecordStorage()
         val first = engine(storage = storage) {
-            worker("slow") {
+            worker(SlowJob) {
                 JabbitWorker {
                     delay(1.hours)
                     JobResult.success()
@@ -356,12 +402,12 @@ class JobEngineTest {
             }
         }
         first.start()
-        first.enqueue(listOf(oneTimeJob("slow")))
+        first.enqueue(listOf(oneTimeJob(SlowJob)))
         settle()
         assertEquals(JobState.RUNNING, storage.load().single().state)
 
         val restarted = engine(storage = storage) {
-            worker("slow") { JabbitWorker { JobResult.success() } }
+            worker(SlowJob) { JabbitWorker { JobResult.success() } }
         }
         restarted.start()
         settle()
@@ -372,29 +418,19 @@ class JobEngineTest {
     }
 
     @Test
-    fun failsJobsWhoseWorkerCannotBeCreated() = runTest {
-        val engine = engine { workerFactory { null } }
-        engine.start()
-        engine.enqueue(listOf(oneTimeJob("missing")))
-        settle()
-
-        assertEquals(JobState.FAILED, engine.snapshot().single().state)
-    }
-
-    @Test
-    fun rejectsUnregisteredWorkersUpFront() = runTest {
-        val engine = engine { worker("known") { JabbitWorker { JobResult.success() } } }
+    fun rejectsJobTypesThatWereNeverRegistered() = runTest {
+        val engine = engine { worker(OkJob) { JabbitWorker { JobResult.success(1) } } }
 
         assertFailsWith<IllegalArgumentException> {
-            engine.enqueue(listOf(oneTimeJob("unknown")))
+            engine.enqueue(listOf(oneTimeJob(GreetJob, Greeting("world"))))
         }
     }
 
     @Test
     fun prunesFinishedJobs() = runTest {
-        val engine = engine { worker("ok") { JabbitWorker { JobResult.success() } } }
+        val engine = engine { worker(OkJob) { JabbitWorker { JobResult.success(1) } } }
         engine.start()
-        engine.enqueue(listOf(oneTimeJob("ok")))
+        engine.enqueue(listOf(oneTimeJob(OkJob)))
         settle()
         assertEquals(1, engine.snapshot().size)
 
@@ -411,29 +447,16 @@ class JobEngineTest {
     private fun TestScope.engine(
         deviceState: DeviceStateProvider = FakeDeviceStateProvider(),
         storage: JobRecordStorage = InMemoryJobRecordStorage(),
-        maxConcurrentJobs: Int = 4,
-        configure: JabbitConfiguration.Builder.() -> Unit
+        concurrency: Int = 4,
+        configure: JabbitScope.() -> Unit
     ): JobEngine = JobEngine(
-        configuration = JabbitConfiguration.Builder()
+        configuration = JabbitScope()
             .apply(configure)
-            .maxConcurrentJobs(maxConcurrentJobs)
-            .build(),
+            .apply { maxConcurrentJobs(concurrency) }
+            .buildConfiguration(),
         storage = storage,
         deviceStateProvider = deviceState,
         scope = backgroundScope,
         clock = { testScheduler.currentTime }
     )
-}
-
-private class FakeDeviceStateProvider(initial: DeviceState = DeviceState()) : DeviceStateProvider {
-
-    private val state = MutableStateFlow(initial)
-
-    override val changes: Flow<DeviceState> = state
-
-    override suspend fun current(): DeviceState = state.value
-
-    fun update(block: DeviceState.() -> DeviceState) {
-        state.value = state.value.block()
-    }
 }

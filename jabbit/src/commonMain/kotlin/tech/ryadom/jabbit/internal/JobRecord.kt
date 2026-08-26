@@ -3,9 +3,9 @@ package tech.ryadom.jabbit.internal
 import kotlinx.serialization.Serializable
 import tech.ryadom.jabbit.BackoffPolicy
 import tech.ryadom.jabbit.Constraints
-import tech.ryadom.jabbit.JobData
 import tech.ryadom.jabbit.JobId
 import tech.ryadom.jabbit.JobInfo
+import tech.ryadom.jabbit.JobProgress
 import tech.ryadom.jabbit.JobRequest
 import tech.ryadom.jabbit.JobState
 import tech.ryadom.jabbit.PeriodicJobRequest
@@ -13,15 +13,15 @@ import tech.ryadom.jabbit.PeriodicJobRequest
 @Serializable
 internal data class JobRecord(
     val id: String,
-    val workerName: String,
+    val typeName: String,
     val uniqueName: String? = null,
     val tags: Set<String> = emptySet(),
-    @Serializable(with = JobDataSerializer::class)
-    val inputData: JobData = JobData.EMPTY,
+    val encodedInput: String = "null",
     @Serializable(with = ConstraintsSerializer::class)
     val constraints: Constraints = Constraints.NONE,
     val backoffPolicy: BackoffPolicy = BackoffPolicy.EXPONENTIAL,
     val backoffDelayMillis: Long = BackoffPolicy.DEFAULT_DELAY.inWholeMilliseconds,
+    val maxAttempts: Int = JobRequest.UNLIMITED_ATTEMPTS,
     val initialDelayMillis: Long = 0L,
     val repeatIntervalMillis: Long? = null,
     val flexIntervalMillis: Long? = null,
@@ -31,10 +31,9 @@ internal data class JobRecord(
     val earliestRunAtMillis: Long = 0L,
     val createdAtMillis: Long = 0L,
     val finishedAtMillis: Long? = null,
-    @Serializable(with = JobDataSerializer::class)
-    val outputData: JobData = JobData.EMPTY,
-    @Serializable(with = JobDataSerializer::class)
-    val progress: JobData = JobData.EMPTY
+    val encodedOutput: String? = null,
+    val failureReason: String? = null,
+    val progress: JobProgress? = null
 ) {
 
     val isPeriodic: Boolean get() = repeatIntervalMillis != null
@@ -48,13 +47,14 @@ internal fun JobRequest.toRecord(uniqueName: String?, nowMillis: Long): JobRecor
 
     return JobRecord(
         id = id.value,
-        workerName = workerName,
+        typeName = typeName,
         uniqueName = uniqueName,
         tags = tags,
-        inputData = inputData,
+        encodedInput = encodedInput,
         constraints = constraints,
         backoffPolicy = backoffPolicy,
         backoffDelayMillis = backoffDelay.inWholeMilliseconds,
+        maxAttempts = maxAttempts,
         initialDelayMillis = initialDelay.inWholeMilliseconds,
         repeatIntervalMillis = interval,
         flexIntervalMillis = flex,
@@ -71,12 +71,13 @@ internal fun JobRequest.toRecord(uniqueName: String?, nowMillis: Long): JobRecor
 }
 
 internal fun JobRecord.withConfigurationOf(other: JobRecord): JobRecord = copy(
-    workerName = other.workerName,
+    typeName = other.typeName,
     tags = other.tags,
-    inputData = other.inputData,
+    encodedInput = other.encodedInput,
     constraints = other.constraints,
     backoffPolicy = other.backoffPolicy,
     backoffDelayMillis = other.backoffDelayMillis,
+    maxAttempts = other.maxAttempts,
     initialDelayMillis = other.initialDelayMillis,
     repeatIntervalMillis = other.repeatIntervalMillis,
     flexIntervalMillis = other.flexIntervalMillis
@@ -87,7 +88,7 @@ internal fun JobRecord.recovered(nowMillis: Long): JobRecord = when (state) {
         state = JobState.ENQUEUED,
         runAttemptCount = runAttemptCount + 1,
         earliestRunAtMillis = nowMillis,
-        progress = JobData.EMPTY
+        progress = null
     )
 
     else -> this
@@ -106,18 +107,19 @@ internal fun JobRecord.nextPeriod(nowMillis: Long): JobRecord {
         periodStartAtMillis = periodStart,
         earliestRunAtMillis = periodStart + (interval - flex),
         finishedAtMillis = null,
-        progress = JobData.EMPTY
+        progress = null
     )
 }
 
 internal fun JobRecord.toJobInfo(): JobInfo = JobInfo(
     id = JobId(id),
-    workerName = workerName,
+    typeName = typeName,
     state = state,
     tags = tags,
     uniqueName = uniqueName,
-    outputData = outputData,
     progress = progress,
+    failureReason = failureReason,
     runAttemptCount = runAttemptCount,
-    nextScheduleTimeMillis = earliestRunAtMillis.takeIf { state == JobState.ENQUEUED }
+    nextScheduleTimeMillis = earliestRunAtMillis.takeIf { state == JobState.ENQUEUED },
+    encodedOutput = encodedOutput
 )

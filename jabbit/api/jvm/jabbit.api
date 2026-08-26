@@ -1,0 +1,492 @@
+public final class tech/ryadom/jabbit/AndroidScope {
+}
+
+public final class tech/ryadom/jabbit/BackoffPolicy : java/lang/Enum {
+	public static final field Companion Ltech/ryadom/jabbit/BackoffPolicy$Companion;
+	public static final field EXPONENTIAL Ltech/ryadom/jabbit/BackoffPolicy;
+	public static final field LINEAR Ltech/ryadom/jabbit/BackoffPolicy;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ltech/ryadom/jabbit/BackoffPolicy;
+	public static fun values ()[Ltech/ryadom/jabbit/BackoffPolicy;
+}
+
+public final class tech/ryadom/jabbit/BackoffPolicy$Companion {
+	public final fun getDEFAULT_DELAY-UwyO8pc ()J
+	public final fun getMAX_DELAY-UwyO8pc ()J
+	public final fun getMIN_DELAY-UwyO8pc ()J
+}
+
+public final class tech/ryadom/jabbit/BrowserScope {
+	public final fun getBackgroundSyncTag ()Ljava/lang/String;
+	public final fun getCoordinateTabs ()Z
+	public final fun getLowBatteryThreshold ()F
+	public final fun getLowStorageThresholdBytes ()J
+	public final fun getPeriodicSyncInterval-FghU774 ()Lkotlin/time/Duration;
+	public final fun getPeriodicSyncTag ()Ljava/lang/String;
+	public final fun getQueueName ()Ljava/lang/String;
+	public final fun getRequestPersistentStorage ()Z
+	public final fun getStorage ()Ltech/ryadom/jabbit/JabbitStorage;
+	public final fun setBackgroundSyncTag (Ljava/lang/String;)V
+	public final fun setCoordinateTabs (Z)V
+	public final fun setLowBatteryThreshold (F)V
+	public final fun setLowStorageThresholdBytes (J)V
+	public final fun setPeriodicSyncInterval-BwNAW2A (Lkotlin/time/Duration;)V
+	public final fun setPeriodicSyncTag (Ljava/lang/String;)V
+	public final fun setQueueName (Ljava/lang/String;)V
+	public final fun setRequestPersistentStorage (Z)V
+	public final fun setStorage (Ltech/ryadom/jabbit/JabbitStorage;)V
+}
+
+public final class tech/ryadom/jabbit/Constraints {
+	public static final field Companion Ltech/ryadom/jabbit/Constraints$Companion;
+	public fun <init> ()V
+	public fun <init> (Ltech/ryadom/jabbit/NetworkType;ZZZZ)V
+	public synthetic fun <init> (Ltech/ryadom/jabbit/NetworkType;ZZZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ltech/ryadom/jabbit/NetworkType;
+	public final fun component2 ()Z
+	public final fun component3 ()Z
+	public final fun component4 ()Z
+	public final fun component5 ()Z
+	public final fun copy (Ltech/ryadom/jabbit/NetworkType;ZZZZ)Ltech/ryadom/jabbit/Constraints;
+	public static synthetic fun copy$default (Ltech/ryadom/jabbit/Constraints;Ltech/ryadom/jabbit/NetworkType;ZZZZILjava/lang/Object;)Ltech/ryadom/jabbit/Constraints;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getRequiredNetworkType ()Ltech/ryadom/jabbit/NetworkType;
+	public final fun getRequiresBatteryNotLow ()Z
+	public final fun getRequiresCharging ()Z
+	public final fun getRequiresDeviceIdle ()Z
+	public final fun getRequiresStorageNotLow ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tech/ryadom/jabbit/Constraints$Builder {
+	public fun <init> ()V
+	public final fun build ()Ltech/ryadom/jabbit/Constraints;
+	public final fun setRequiredNetworkType (Ltech/ryadom/jabbit/NetworkType;)Ltech/ryadom/jabbit/Constraints$Builder;
+	public final fun setRequiresBatteryNotLow (Z)Ltech/ryadom/jabbit/Constraints$Builder;
+	public final fun setRequiresCharging (Z)Ltech/ryadom/jabbit/Constraints$Builder;
+	public final fun setRequiresDeviceIdle (Z)Ltech/ryadom/jabbit/Constraints$Builder;
+	public final fun setRequiresStorageNotLow (Z)Ltech/ryadom/jabbit/Constraints$Builder;
+}
+
+public final class tech/ryadom/jabbit/Constraints$Companion {
+	public final fun getNONE ()Ltech/ryadom/jabbit/Constraints;
+}
+
+public final class tech/ryadom/jabbit/ConstraintsKt {
+	public static final fun constraints (Lkotlin/jvm/functions/Function1;)Ltech/ryadom/jabbit/Constraints;
+}
+
+public final class tech/ryadom/jabbit/ConstraintsScope {
+	public final fun getRequiredNetworkType ()Ltech/ryadom/jabbit/NetworkType;
+	public final fun getRequiresBatteryNotLow ()Z
+	public final fun getRequiresCharging ()Z
+	public final fun getRequiresDeviceIdle ()Z
+	public final fun getRequiresStorageNotLow ()Z
+	public final fun setRequiredNetworkType (Ltech/ryadom/jabbit/NetworkType;)V
+	public final fun setRequiresBatteryNotLow (Z)V
+	public final fun setRequiresCharging (Z)V
+	public final fun setRequiresDeviceIdle (Z)V
+	public final fun setRequiresStorageNotLow (Z)V
+}
+
+public abstract interface class tech/ryadom/jabbit/DesktopJabbit : java/lang/AutoCloseable, tech/ryadom/jabbit/Jabbit {
+}
+
+public final class tech/ryadom/jabbit/DesktopScope {
+	public final fun getApplicationName ()Ljava/lang/String;
+	public final fun getLowBatteryThreshold ()F
+	public final fun getLowStorageThresholdBytes ()J
+	public final fun getPollInterval-FghU774 ()Lkotlin/time/Duration;
+	public final fun getReadPowerSource ()Z
+	public final fun getSingleInstanceLock ()Z
+	public final fun getStorage ()Ltech/ryadom/jabbit/JabbitStorage;
+	public final fun getStorageDirectory ()Ljava/lang/String;
+	public final fun setApplicationName (Ljava/lang/String;)V
+	public final fun setLowBatteryThreshold (F)V
+	public final fun setLowStorageThresholdBytes (J)V
+	public final fun setPollInterval-BwNAW2A (Lkotlin/time/Duration;)V
+	public final fun setReadPowerSource (Z)V
+	public final fun setSingleInstanceLock (Z)V
+	public final fun setStorage (Ltech/ryadom/jabbit/JabbitStorage;)V
+	public final fun setStorageDirectory (Ljava/lang/String;)V
+}
+
+public final class tech/ryadom/jabbit/ExistingJobPolicy : java/lang/Enum {
+	public static final field KEEP Ltech/ryadom/jabbit/ExistingJobPolicy;
+	public static final field REPLACE Ltech/ryadom/jabbit/ExistingJobPolicy;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ltech/ryadom/jabbit/ExistingJobPolicy;
+	public static fun values ()[Ltech/ryadom/jabbit/ExistingJobPolicy;
+}
+
+public final class tech/ryadom/jabbit/ExistingPeriodicJobPolicy : java/lang/Enum {
+	public static final field CANCEL_AND_REENQUEUE Ltech/ryadom/jabbit/ExistingPeriodicJobPolicy;
+	public static final field KEEP Ltech/ryadom/jabbit/ExistingPeriodicJobPolicy;
+	public static final field UPDATE Ltech/ryadom/jabbit/ExistingPeriodicJobPolicy;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ltech/ryadom/jabbit/ExistingPeriodicJobPolicy;
+	public static fun values ()[Ltech/ryadom/jabbit/ExistingPeriodicJobPolicy;
+}
+
+public final class tech/ryadom/jabbit/FileJabbitStorage : tech/ryadom/jabbit/JabbitStorage {
+	public fun <init> (Ljava/nio/file/Path;)V
+	public fun read (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun write (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class tech/ryadom/jabbit/IosScope {
+	public final fun getBackgroundTaskIdentifier ()Ljava/lang/String;
+	public final fun getLowBatteryThreshold ()F
+	public final fun getLowStorageThresholdBytes ()J
+	public final fun getStorage ()Ltech/ryadom/jabbit/JabbitStorage;
+	public final fun setBackgroundTaskIdentifier (Ljava/lang/String;)V
+	public final fun setLowBatteryThreshold (F)V
+	public final fun setLowStorageThresholdBytes (J)V
+	public final fun setStorage (Ltech/ryadom/jabbit/JabbitStorage;)V
+}
+
+public abstract interface class tech/ryadom/jabbit/Jabbit {
+	public abstract fun cancelAllJobs (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun cancelJob-s8xdFbM (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun cancelJobsByTag (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun cancelUniqueJob (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun enqueue (Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun enqueue (Ltech/ryadom/jabbit/JobRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun enqueueUnique (Ljava/lang/String;Ltech/ryadom/jabbit/ExistingJobPolicy;Ltech/ryadom/jabbit/OneTimeJobRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun enqueueUniquePeriodic (Ljava/lang/String;Ltech/ryadom/jabbit/ExistingPeriodicJobPolicy;Ltech/ryadom/jabbit/PeriodicJobRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun getJobInfo-s8xdFbM (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun getJobInfoFlow-UXYyTLM (Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
+	public abstract fun getJobInfosByTag (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun getJobInfosByTagFlow (Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
+	public abstract fun getJobInfosForUniqueJob (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun getJobInfosForUniqueJobFlow (Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
+	public abstract fun pruneFinishedJobs (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface annotation class tech/ryadom/jabbit/JabbitDsl : java/lang/annotation/Annotation {
+}
+
+public final class tech/ryadom/jabbit/JabbitDslKt {
+	public static final fun jabbit (Lkotlin/jvm/functions/Function1;)Ltech/ryadom/jabbit/Jabbit;
+}
+
+public abstract interface class tech/ryadom/jabbit/JabbitListener {
+	public fun onCancelled (Ltech/ryadom/jabbit/JobInfo;)V
+	public fun onEnqueued (Ltech/ryadom/jabbit/JobInfo;)V
+	public fun onFailed (Ltech/ryadom/jabbit/JobInfo;Ljava/lang/Throwable;)V
+	public fun onRetryScheduled (Ltech/ryadom/jabbit/JobInfo;Ljava/lang/Long;)V
+	public fun onStarted (Ltech/ryadom/jabbit/JobInfo;)V
+	public fun onStopped (Ltech/ryadom/jabbit/JobInfo;)V
+	public fun onSucceeded (Ltech/ryadom/jabbit/JobInfo;)V
+}
+
+public final class tech/ryadom/jabbit/JabbitListener$DefaultImpls {
+	public static fun onCancelled (Ltech/ryadom/jabbit/JabbitListener;Ltech/ryadom/jabbit/JobInfo;)V
+	public static fun onEnqueued (Ltech/ryadom/jabbit/JabbitListener;Ltech/ryadom/jabbit/JobInfo;)V
+	public static fun onFailed (Ltech/ryadom/jabbit/JabbitListener;Ltech/ryadom/jabbit/JobInfo;Ljava/lang/Throwable;)V
+	public static fun onRetryScheduled (Ltech/ryadom/jabbit/JabbitListener;Ltech/ryadom/jabbit/JobInfo;Ljava/lang/Long;)V
+	public static fun onStarted (Ltech/ryadom/jabbit/JabbitListener;Ltech/ryadom/jabbit/JobInfo;)V
+	public static fun onStopped (Ltech/ryadom/jabbit/JabbitListener;Ltech/ryadom/jabbit/JobInfo;)V
+	public static fun onSucceeded (Ltech/ryadom/jabbit/JabbitListener;Ltech/ryadom/jabbit/JobInfo;)V
+}
+
+public abstract interface class tech/ryadom/jabbit/JabbitLogger {
+	public static final field Companion Ltech/ryadom/jabbit/JabbitLogger$Companion;
+	public abstract fun log (Ltech/ryadom/jabbit/JabbitLogger$Level;Ljava/lang/String;Ljava/lang/Throwable;)V
+}
+
+public final class tech/ryadom/jabbit/JabbitLogger$Companion {
+	public final fun getConsole ()Ltech/ryadom/jabbit/JabbitLogger;
+	public final fun getNone ()Ltech/ryadom/jabbit/JabbitLogger;
+}
+
+public final class tech/ryadom/jabbit/JabbitLogger$Level : java/lang/Enum {
+	public static final field DEBUG Ltech/ryadom/jabbit/JabbitLogger$Level;
+	public static final field ERROR Ltech/ryadom/jabbit/JabbitLogger$Level;
+	public static final field INFO Ltech/ryadom/jabbit/JabbitLogger$Level;
+	public static final field WARN Ltech/ryadom/jabbit/JabbitLogger$Level;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ltech/ryadom/jabbit/JabbitLogger$Level;
+	public static fun values ()[Ltech/ryadom/jabbit/JabbitLogger$Level;
+}
+
+public final class tech/ryadom/jabbit/JabbitScope {
+	public static final field DEFAULT_MAX_CONCURRENT_JOBS I
+	public final fun android (Lkotlin/jvm/functions/Function1;)V
+	public final fun browser (Lkotlin/jvm/functions/Function1;)V
+	public final fun desktop (Lkotlin/jvm/functions/Function1;)V
+	public final fun finishedJobRetention-LRDsOJo (J)V
+	public final fun ios (Lkotlin/jvm/functions/Function1;)V
+	public final fun listener (Ltech/ryadom/jabbit/JabbitListener;)V
+	public final fun logger (Ltech/ryadom/jabbit/JabbitLogger;)V
+	public final fun maxConcurrentJobs (I)V
+	public final fun worker (Ltech/ryadom/jabbit/JobType;Lkotlin/jvm/functions/Function0;)V
+}
+
+public abstract interface class tech/ryadom/jabbit/JabbitStorage {
+	public abstract fun read (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun write (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class tech/ryadom/jabbit/JabbitWorker {
+	public abstract fun doWork (Ltech/ryadom/jabbit/JobExecution;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class tech/ryadom/jabbit/JobExecution {
+	public static final field Companion Ltech/ryadom/jabbit/JobExecution$Companion;
+	public final fun getId-vFY7rvk ()Ljava/lang/String;
+	public final fun getInput ()Ljava/lang/Object;
+	public final fun getRunAttemptCount ()I
+	public final fun getTags ()Ljava/util/Set;
+	public final fun getTypeName ()Ljava/lang/String;
+	public final fun setProgress (Ltech/ryadom/jabbit/JobProgress;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class tech/ryadom/jabbit/JobExecution$Companion {
+	public final fun forTesting-D74bSeY (Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;ILtech/ryadom/jabbit/ProgressReporter;)Ltech/ryadom/jabbit/JobExecution;
+	public static synthetic fun forTesting-D74bSeY$default (Ltech/ryadom/jabbit/JobExecution$Companion;Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;ILtech/ryadom/jabbit/ProgressReporter;ILjava/lang/Object;)Ltech/ryadom/jabbit/JobExecution;
+}
+
+public final class tech/ryadom/jabbit/JobId {
+	public static final field Companion Ltech/ryadom/jabbit/JobId$Companion;
+	public static final synthetic fun box-impl (Ljava/lang/String;)Ltech/ryadom/jabbit/JobId;
+	public static fun constructor-impl (Ljava/lang/String;)Ljava/lang/String;
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun equals-impl (Ljava/lang/String;Ljava/lang/Object;)Z
+	public static final fun equals-impl0 (Ljava/lang/String;Ljava/lang/String;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public static fun hashCode-impl (Ljava/lang/String;)I
+	public fun toString ()Ljava/lang/String;
+	public static fun toString-impl (Ljava/lang/String;)Ljava/lang/String;
+	public final synthetic fun unbox-impl ()Ljava/lang/String;
+}
+
+public final class tech/ryadom/jabbit/JobId$Companion {
+	public final fun random-vFY7rvk ()Ljava/lang/String;
+}
+
+public final class tech/ryadom/jabbit/JobInfo {
+	public final fun component1-vFY7rvk ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ltech/ryadom/jabbit/JobState;
+	public final fun component4 ()Ljava/util/Set;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ltech/ryadom/jabbit/JobProgress;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()I
+	public final fun component9 ()Ljava/lang/Long;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFailureReason ()Ljava/lang/String;
+	public final fun getId-vFY7rvk ()Ljava/lang/String;
+	public final fun getNextScheduleTimeMillis ()Ljava/lang/Long;
+	public final fun getProgress ()Ltech/ryadom/jabbit/JobProgress;
+	public final fun getRunAttemptCount ()I
+	public final fun getState ()Ltech/ryadom/jabbit/JobState;
+	public final fun getTags ()Ljava/util/Set;
+	public final fun getTypeName ()Ljava/lang/String;
+	public final fun getUniqueName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tech/ryadom/jabbit/JobInfoKt {
+	public static final fun output (Ltech/ryadom/jabbit/JobInfo;Ltech/ryadom/jabbit/JobType;)Ljava/lang/Object;
+}
+
+public final class tech/ryadom/jabbit/JobProgress {
+	public static final field Companion Ltech/ryadom/jabbit/JobProgress$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/Float;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/Float;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/Float;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/Float;Ljava/lang/String;)Ltech/ryadom/jabbit/JobProgress;
+	public static synthetic fun copy$default (Ltech/ryadom/jabbit/JobProgress;Ljava/lang/Float;Ljava/lang/String;ILjava/lang/Object;)Ltech/ryadom/jabbit/JobProgress;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFraction ()Ljava/lang/Float;
+	public final fun getMessage ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class tech/ryadom/jabbit/JobProgress$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ltech/ryadom/jabbit/JobProgress$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ltech/ryadom/jabbit/JobProgress;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ltech/ryadom/jabbit/JobProgress;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class tech/ryadom/jabbit/JobProgress$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public abstract class tech/ryadom/jabbit/JobRequest {
+	public static final field Companion Ltech/ryadom/jabbit/JobRequest$Companion;
+	public static final field UNLIMITED_ATTEMPTS I
+	public abstract fun getBackoffDelay-UwyO8pc ()J
+	public final fun getBackoffDelayMillis ()J
+	public abstract fun getBackoffPolicy ()Ltech/ryadom/jabbit/BackoffPolicy;
+	public abstract fun getConstraints ()Ltech/ryadom/jabbit/Constraints;
+	public abstract fun getId-vFY7rvk ()Ljava/lang/String;
+	public abstract fun getInitialDelay-UwyO8pc ()J
+	public final fun getInitialDelayMillis ()J
+	public abstract fun getMaxAttempts ()I
+	public abstract fun getTags ()Ljava/util/Set;
+	public abstract fun getTypeName ()Ljava/lang/String;
+}
+
+public abstract class tech/ryadom/jabbit/JobRequest$Builder {
+	public final fun addTag (Ljava/lang/String;)Ltech/ryadom/jabbit/JobRequest$Builder;
+	public final fun addTags (Ljava/lang/Iterable;)Ltech/ryadom/jabbit/JobRequest$Builder;
+	public final fun setBackoffCriteria-HG0u8IE (Ltech/ryadom/jabbit/BackoffPolicy;J)Ltech/ryadom/jabbit/JobRequest$Builder;
+	public final fun setBackoffCriteriaMillis (Ltech/ryadom/jabbit/BackoffPolicy;J)Ltech/ryadom/jabbit/JobRequest$Builder;
+	public final fun setConstraints (Ltech/ryadom/jabbit/Constraints;)Ltech/ryadom/jabbit/JobRequest$Builder;
+	public final fun setId-UXYyTLM (Ljava/lang/String;)Ltech/ryadom/jabbit/JobRequest$Builder;
+	public final fun setInitialDelay-LRDsOJo (J)Ltech/ryadom/jabbit/JobRequest$Builder;
+	public final fun setInitialDelayMillis (J)Ltech/ryadom/jabbit/JobRequest$Builder;
+	public final fun setMaxAttempts (I)Ltech/ryadom/jabbit/JobRequest$Builder;
+}
+
+public final class tech/ryadom/jabbit/JobRequest$Companion {
+}
+
+public final class tech/ryadom/jabbit/JobRequestKt {
+	public static final fun oneTimeJob (Ltech/ryadom/jabbit/JobType;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)Ltech/ryadom/jabbit/OneTimeJobRequest;
+	public static final fun oneTimeJob (Ltech/ryadom/jabbit/JobType;Lkotlin/jvm/functions/Function1;)Ltech/ryadom/jabbit/OneTimeJobRequest;
+	public static synthetic fun oneTimeJob$default (Ltech/ryadom/jabbit/JobType;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ltech/ryadom/jabbit/OneTimeJobRequest;
+	public static synthetic fun oneTimeJob$default (Ltech/ryadom/jabbit/JobType;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ltech/ryadom/jabbit/OneTimeJobRequest;
+	public static final fun periodicJob-8Mi8wO0 (Ltech/ryadom/jabbit/JobType;JLkotlin/jvm/functions/Function1;)Ltech/ryadom/jabbit/PeriodicJobRequest;
+	public static synthetic fun periodicJob-8Mi8wO0$default (Ltech/ryadom/jabbit/JobType;JLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ltech/ryadom/jabbit/PeriodicJobRequest;
+	public static final fun periodicJob-exY8QGI (Ltech/ryadom/jabbit/JobType;Ljava/lang/Object;JLkotlin/jvm/functions/Function1;)Ltech/ryadom/jabbit/PeriodicJobRequest;
+	public static synthetic fun periodicJob-exY8QGI$default (Ltech/ryadom/jabbit/JobType;Ljava/lang/Object;JLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ltech/ryadom/jabbit/PeriodicJobRequest;
+	public static final fun periodicJobMillis (Ltech/ryadom/jabbit/JobType;JLkotlin/jvm/functions/Function1;)Ltech/ryadom/jabbit/PeriodicJobRequest;
+	public static final fun periodicJobMillis (Ltech/ryadom/jabbit/JobType;Ljava/lang/Object;JLkotlin/jvm/functions/Function1;)Ltech/ryadom/jabbit/PeriodicJobRequest;
+	public static synthetic fun periodicJobMillis$default (Ltech/ryadom/jabbit/JobType;JLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ltech/ryadom/jabbit/PeriodicJobRequest;
+	public static synthetic fun periodicJobMillis$default (Ltech/ryadom/jabbit/JobType;Ljava/lang/Object;JLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ltech/ryadom/jabbit/PeriodicJobRequest;
+}
+
+public abstract class tech/ryadom/jabbit/JobResult {
+	public static final field Companion Ltech/ryadom/jabbit/JobResult$Companion;
+}
+
+public final class tech/ryadom/jabbit/JobResult$Companion {
+	public final fun failure (Ljava/lang/String;)Ltech/ryadom/jabbit/JobResult;
+	public static synthetic fun failure$default (Ltech/ryadom/jabbit/JobResult$Companion;Ljava/lang/String;ILjava/lang/Object;)Ltech/ryadom/jabbit/JobResult;
+	public final fun retry ()Ltech/ryadom/jabbit/JobResult;
+	public final fun success ()Ltech/ryadom/jabbit/JobResult;
+	public final fun success (Ljava/lang/Object;)Ltech/ryadom/jabbit/JobResult;
+}
+
+public final class tech/ryadom/jabbit/JobResult$Failure : tech/ryadom/jabbit/JobResult {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Ltech/ryadom/jabbit/JobResult$Failure;
+	public static synthetic fun copy$default (Ltech/ryadom/jabbit/JobResult$Failure;Ljava/lang/String;ILjava/lang/Object;)Ltech/ryadom/jabbit/JobResult$Failure;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getReason ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tech/ryadom/jabbit/JobResult$Retry : tech/ryadom/jabbit/JobResult {
+	public static final field INSTANCE Ltech/ryadom/jabbit/JobResult$Retry;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tech/ryadom/jabbit/JobResult$Success : tech/ryadom/jabbit/JobResult {
+	public fun <init> (Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;)Ltech/ryadom/jabbit/JobResult$Success;
+	public static synthetic fun copy$default (Ltech/ryadom/jabbit/JobResult$Success;Ljava/lang/Object;ILjava/lang/Object;)Ltech/ryadom/jabbit/JobResult$Success;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getOutput ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tech/ryadom/jabbit/JobState : java/lang/Enum {
+	public static final field BLOCKED Ltech/ryadom/jabbit/JobState;
+	public static final field CANCELLED Ltech/ryadom/jabbit/JobState;
+	public static final field ENQUEUED Ltech/ryadom/jabbit/JobState;
+	public static final field FAILED Ltech/ryadom/jabbit/JobState;
+	public static final field RUNNING Ltech/ryadom/jabbit/JobState;
+	public static final field SUCCEEDED Ltech/ryadom/jabbit/JobState;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun isFinished ()Z
+	public static fun valueOf (Ljava/lang/String;)Ltech/ryadom/jabbit/JobState;
+	public static fun values ()[Ltech/ryadom/jabbit/JobState;
+}
+
+public final class tech/ryadom/jabbit/JobType {
+	public fun <init> (Ljava/lang/String;Lkotlinx/serialization/KSerializer;Lkotlinx/serialization/KSerializer;)V
+	public final fun getName ()Ljava/lang/String;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tech/ryadom/jabbit/NetworkType : java/lang/Enum {
+	public static final field CONNECTED Ltech/ryadom/jabbit/NetworkType;
+	public static final field METERED Ltech/ryadom/jabbit/NetworkType;
+	public static final field NOT_REQUIRED Ltech/ryadom/jabbit/NetworkType;
+	public static final field NOT_ROAMING Ltech/ryadom/jabbit/NetworkType;
+	public static final field UNMETERED Ltech/ryadom/jabbit/NetworkType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ltech/ryadom/jabbit/NetworkType;
+	public static fun values ()[Ltech/ryadom/jabbit/NetworkType;
+}
+
+public final class tech/ryadom/jabbit/OneTimeJobRequest : tech/ryadom/jabbit/JobRequest {
+	public fun getBackoffDelay-UwyO8pc ()J
+	public fun getBackoffPolicy ()Ltech/ryadom/jabbit/BackoffPolicy;
+	public fun getConstraints ()Ltech/ryadom/jabbit/Constraints;
+	public fun getId-vFY7rvk ()Ljava/lang/String;
+	public fun getInitialDelay-UwyO8pc ()J
+	public fun getMaxAttempts ()I
+	public fun getTags ()Ljava/util/Set;
+	public fun getTypeName ()Ljava/lang/String;
+}
+
+public final class tech/ryadom/jabbit/OneTimeJobRequest$Builder : tech/ryadom/jabbit/JobRequest$Builder {
+	public final fun build ()Ltech/ryadom/jabbit/OneTimeJobRequest;
+}
+
+public final class tech/ryadom/jabbit/PeriodicJobRequest : tech/ryadom/jabbit/JobRequest {
+	public static final field Companion Ltech/ryadom/jabbit/PeriodicJobRequest$Companion;
+	public fun getBackoffDelay-UwyO8pc ()J
+	public fun getBackoffPolicy ()Ltech/ryadom/jabbit/BackoffPolicy;
+	public fun getConstraints ()Ltech/ryadom/jabbit/Constraints;
+	public final fun getFlexInterval-UwyO8pc ()J
+	public final fun getFlexIntervalMillis ()J
+	public fun getId-vFY7rvk ()Ljava/lang/String;
+	public fun getInitialDelay-UwyO8pc ()J
+	public fun getMaxAttempts ()I
+	public final fun getRepeatInterval-UwyO8pc ()J
+	public final fun getRepeatIntervalMillis ()J
+	public fun getTags ()Ljava/util/Set;
+	public fun getTypeName ()Ljava/lang/String;
+}
+
+public final class tech/ryadom/jabbit/PeriodicJobRequest$Builder : tech/ryadom/jabbit/JobRequest$Builder {
+	public final fun build ()Ltech/ryadom/jabbit/PeriodicJobRequest;
+	public final fun setFlexInterval-LRDsOJo (J)Ltech/ryadom/jabbit/PeriodicJobRequest$Builder;
+	public final fun setFlexIntervalMillis (J)Ltech/ryadom/jabbit/PeriodicJobRequest$Builder;
+}
+
+public final class tech/ryadom/jabbit/PeriodicJobRequest$Companion {
+	public final fun getMIN_FLEX_INTERVAL-UwyO8pc ()J
+	public final fun getMIN_PERIODIC_INTERVAL-UwyO8pc ()J
+}
+
+public abstract interface class tech/ryadom/jabbit/ProgressReporter {
+	public abstract fun report (Ltech/ryadom/jabbit/JobProgress;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+

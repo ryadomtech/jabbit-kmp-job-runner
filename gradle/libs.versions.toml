@@ -6,6 +6,11 @@ serialization = "1.11.0"
 work = "2.11.2"
 browser = "0.5.0"
 compose = "1.11.1"
+binary-compatibility = "0.18.1"
+dokka = "2.2.0"
+robolectric = "4.16.1"
+androidx-test-core = "1.7.0"
+junit = "4.13.2"
 compose-material3 = "1.9.0"
 activity-compose = "1.13.0"
 lifecycle-compose = "2.11.0"
@@ -27,10 +32,16 @@ compose-runtime = { group = "org.jetbrains.compose.runtime", name = "runtime", v
 lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle-compose" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
 kotlinx-browser = { module = "org.jetbrains.kotlinx:kotlinx-browser", version.ref = "browser" }
+androidx-work-testing = { module = "androidx.work:work-testing", version.ref = "work" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+androidx-test-core = { module = "androidx.test:core", version.ref = "androidx-test-core" }
+junit = { module = "junit:junit", version.ref = "junit" }
 androidx-work-runtime = { module = "androidx.work:work-runtime", version.ref = "work" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 
 [plugins]
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
+binaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "binary-compatibility" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlinMultiplatformLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }

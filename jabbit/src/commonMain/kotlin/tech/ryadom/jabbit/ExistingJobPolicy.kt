@@ -11,7 +11,10 @@ public enum class ExistingJobPolicy {
     KEEP,
 
     /**
-     * Cancels the existing job and enqueues the new request.
+     * Drops the existing job and enqueues the new request.
+     *
+     * The replaced job stops being observable: its identifier is forgotten rather than left behind
+     * as [JobState.CANCELLED]. A run already in progress is cancelled cooperatively.
      */
     REPLACE
 }
@@ -34,7 +37,10 @@ public enum class ExistingPeriodicJobPolicy {
     UPDATE,
 
     /**
-     * Cancels the existing job and enqueues the new request, restarting the period.
+     * Drops the existing job and enqueues the new request, restarting the period.
+     *
+     * The replaced job stops being observable: its identifier is forgotten rather than left behind
+     * as [JobState.CANCELLED]. A run already in progress is cancelled cooperatively.
      */
     CANCEL_AND_REENQUEUE
 }

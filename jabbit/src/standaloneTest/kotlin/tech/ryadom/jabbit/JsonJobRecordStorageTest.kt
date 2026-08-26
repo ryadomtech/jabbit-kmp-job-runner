@@ -11,18 +11,10 @@ class JsonJobRecordStorageTest {
 
     private val record = JobRecord(
         id = "9d1a0a3e-0c1a-4d0a-9b1a-0c1a4d0a9b1a",
-        workerName = "sync",
+        typeName = "sync",
         uniqueName = "unique-sync",
         tags = setOf("a", "b"),
-        inputData = jobData {
-            putBoolean("bool", true)
-            putInt("int", 1)
-            putLong("long", 2L)
-            putFloat("float", 3.5f)
-            putDouble("double", 4.5)
-            putString("string", "five")
-            putStringList("list", listOf("six", "seven"))
-        },
+        encodedInput = """{"name":"world"}""",
         constraints = constraints {
             requiredNetworkType = NetworkType.UNMETERED
             requiresCharging = true
@@ -30,6 +22,7 @@ class JsonJobRecordStorageTest {
         },
         backoffPolicy = BackoffPolicy.LINEAR,
         backoffDelayMillis = 15_000,
+        maxAttempts = 5,
         initialDelayMillis = 1_000,
         repeatIntervalMillis = 900_000,
         flexIntervalMillis = 300_000,
@@ -39,8 +32,9 @@ class JsonJobRecordStorageTest {
         earliestRunAtMillis = 20_000,
         createdAtMillis = 5_000,
         finishedAtMillis = null,
-        outputData = jobDataOf("out" to "value"),
-        progress = jobDataOf("percent" to 50)
+        encodedOutput = """{"items":7}""",
+        failureReason = "the server said no",
+        progress = JobProgress(fraction = 0.5f, message = "halfway")
     )
 
     @Test

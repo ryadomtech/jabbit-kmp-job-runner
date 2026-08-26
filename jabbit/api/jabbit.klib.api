@@ -1,0 +1,592 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, js, wasmJs]
+// Alias: ios => [iosArm64, iosSimulatorArm64, iosX64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <jabbit:jabbit>
+open annotation class tech.ryadom.jabbit/JabbitDsl : kotlin/Annotation { // tech.ryadom.jabbit/JabbitDsl|null[0]
+    constructor <init>() // tech.ryadom.jabbit/JabbitDsl.<init>|<init>(){}[0]
+}
+
+final enum class tech.ryadom.jabbit/BackoffPolicy : kotlin/Enum<tech.ryadom.jabbit/BackoffPolicy> { // tech.ryadom.jabbit/BackoffPolicy|null[0]
+    enum entry EXPONENTIAL // tech.ryadom.jabbit/BackoffPolicy.EXPONENTIAL|null[0]
+    enum entry LINEAR // tech.ryadom.jabbit/BackoffPolicy.LINEAR|null[0]
+
+    final val entries // tech.ryadom.jabbit/BackoffPolicy.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<tech.ryadom.jabbit/BackoffPolicy> // tech.ryadom.jabbit/BackoffPolicy.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): tech.ryadom.jabbit/BackoffPolicy // tech.ryadom.jabbit/BackoffPolicy.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<tech.ryadom.jabbit/BackoffPolicy> // tech.ryadom.jabbit/BackoffPolicy.values|values#static(){}[0]
+
+    final object Companion { // tech.ryadom.jabbit/BackoffPolicy.Companion|null[0]
+        final val DEFAULT_DELAY // tech.ryadom.jabbit/BackoffPolicy.Companion.DEFAULT_DELAY|{}DEFAULT_DELAY[0]
+            final fun <get-DEFAULT_DELAY>(): kotlin.time/Duration // tech.ryadom.jabbit/BackoffPolicy.Companion.DEFAULT_DELAY.<get-DEFAULT_DELAY>|<get-DEFAULT_DELAY>(){}[0]
+        final val MAX_DELAY // tech.ryadom.jabbit/BackoffPolicy.Companion.MAX_DELAY|{}MAX_DELAY[0]
+            final fun <get-MAX_DELAY>(): kotlin.time/Duration // tech.ryadom.jabbit/BackoffPolicy.Companion.MAX_DELAY.<get-MAX_DELAY>|<get-MAX_DELAY>(){}[0]
+        final val MIN_DELAY // tech.ryadom.jabbit/BackoffPolicy.Companion.MIN_DELAY|{}MIN_DELAY[0]
+            final fun <get-MIN_DELAY>(): kotlin.time/Duration // tech.ryadom.jabbit/BackoffPolicy.Companion.MIN_DELAY.<get-MIN_DELAY>|<get-MIN_DELAY>(){}[0]
+    }
+}
+
+final enum class tech.ryadom.jabbit/ExistingJobPolicy : kotlin/Enum<tech.ryadom.jabbit/ExistingJobPolicy> { // tech.ryadom.jabbit/ExistingJobPolicy|null[0]
+    enum entry KEEP // tech.ryadom.jabbit/ExistingJobPolicy.KEEP|null[0]
+    enum entry REPLACE // tech.ryadom.jabbit/ExistingJobPolicy.REPLACE|null[0]
+
+    final val entries // tech.ryadom.jabbit/ExistingJobPolicy.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<tech.ryadom.jabbit/ExistingJobPolicy> // tech.ryadom.jabbit/ExistingJobPolicy.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): tech.ryadom.jabbit/ExistingJobPolicy // tech.ryadom.jabbit/ExistingJobPolicy.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<tech.ryadom.jabbit/ExistingJobPolicy> // tech.ryadom.jabbit/ExistingJobPolicy.values|values#static(){}[0]
+}
+
+final enum class tech.ryadom.jabbit/ExistingPeriodicJobPolicy : kotlin/Enum<tech.ryadom.jabbit/ExistingPeriodicJobPolicy> { // tech.ryadom.jabbit/ExistingPeriodicJobPolicy|null[0]
+    enum entry CANCEL_AND_REENQUEUE // tech.ryadom.jabbit/ExistingPeriodicJobPolicy.CANCEL_AND_REENQUEUE|null[0]
+    enum entry KEEP // tech.ryadom.jabbit/ExistingPeriodicJobPolicy.KEEP|null[0]
+    enum entry UPDATE // tech.ryadom.jabbit/ExistingPeriodicJobPolicy.UPDATE|null[0]
+
+    final val entries // tech.ryadom.jabbit/ExistingPeriodicJobPolicy.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<tech.ryadom.jabbit/ExistingPeriodicJobPolicy> // tech.ryadom.jabbit/ExistingPeriodicJobPolicy.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): tech.ryadom.jabbit/ExistingPeriodicJobPolicy // tech.ryadom.jabbit/ExistingPeriodicJobPolicy.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<tech.ryadom.jabbit/ExistingPeriodicJobPolicy> // tech.ryadom.jabbit/ExistingPeriodicJobPolicy.values|values#static(){}[0]
+}
+
+final enum class tech.ryadom.jabbit/JobState : kotlin/Enum<tech.ryadom.jabbit/JobState> { // tech.ryadom.jabbit/JobState|null[0]
+    enum entry BLOCKED // tech.ryadom.jabbit/JobState.BLOCKED|null[0]
+    enum entry CANCELLED // tech.ryadom.jabbit/JobState.CANCELLED|null[0]
+    enum entry ENQUEUED // tech.ryadom.jabbit/JobState.ENQUEUED|null[0]
+    enum entry FAILED // tech.ryadom.jabbit/JobState.FAILED|null[0]
+    enum entry RUNNING // tech.ryadom.jabbit/JobState.RUNNING|null[0]
+    enum entry SUCCEEDED // tech.ryadom.jabbit/JobState.SUCCEEDED|null[0]
+
+    final val entries // tech.ryadom.jabbit/JobState.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<tech.ryadom.jabbit/JobState> // tech.ryadom.jabbit/JobState.entries.<get-entries>|<get-entries>#static(){}[0]
+    final val isFinished // tech.ryadom.jabbit/JobState.isFinished|{}isFinished[0]
+        final fun <get-isFinished>(): kotlin/Boolean // tech.ryadom.jabbit/JobState.isFinished.<get-isFinished>|<get-isFinished>(){}[0]
+
+    final fun valueOf(kotlin/String): tech.ryadom.jabbit/JobState // tech.ryadom.jabbit/JobState.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<tech.ryadom.jabbit/JobState> // tech.ryadom.jabbit/JobState.values|values#static(){}[0]
+}
+
+final enum class tech.ryadom.jabbit/NetworkType : kotlin/Enum<tech.ryadom.jabbit/NetworkType> { // tech.ryadom.jabbit/NetworkType|null[0]
+    enum entry CONNECTED // tech.ryadom.jabbit/NetworkType.CONNECTED|null[0]
+    enum entry METERED // tech.ryadom.jabbit/NetworkType.METERED|null[0]
+    enum entry NOT_REQUIRED // tech.ryadom.jabbit/NetworkType.NOT_REQUIRED|null[0]
+    enum entry NOT_ROAMING // tech.ryadom.jabbit/NetworkType.NOT_ROAMING|null[0]
+    enum entry UNMETERED // tech.ryadom.jabbit/NetworkType.UNMETERED|null[0]
+
+    final val entries // tech.ryadom.jabbit/NetworkType.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<tech.ryadom.jabbit/NetworkType> // tech.ryadom.jabbit/NetworkType.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): tech.ryadom.jabbit/NetworkType // tech.ryadom.jabbit/NetworkType.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<tech.ryadom.jabbit/NetworkType> // tech.ryadom.jabbit/NetworkType.values|values#static(){}[0]
+}
+
+abstract fun interface <#A: kotlin/Any?, #B: kotlin/Any?> tech.ryadom.jabbit/JabbitWorker { // tech.ryadom.jabbit/JabbitWorker|null[0]
+    abstract suspend fun doWork(tech.ryadom.jabbit/JobExecution<#A>): tech.ryadom.jabbit/JobResult<#B> // tech.ryadom.jabbit/JabbitWorker.doWork|doWork(tech.ryadom.jabbit.JobExecution<1:0>){}[0]
+}
+
+abstract fun interface tech.ryadom.jabbit/JabbitLogger { // tech.ryadom.jabbit/JabbitLogger|null[0]
+    abstract fun log(tech.ryadom.jabbit/JabbitLogger.Level, kotlin/String, kotlin/Throwable?) // tech.ryadom.jabbit/JabbitLogger.log|log(tech.ryadom.jabbit.JabbitLogger.Level;kotlin.String;kotlin.Throwable?){}[0]
+
+    final enum class Level : kotlin/Enum<tech.ryadom.jabbit/JabbitLogger.Level> { // tech.ryadom.jabbit/JabbitLogger.Level|null[0]
+        enum entry DEBUG // tech.ryadom.jabbit/JabbitLogger.Level.DEBUG|null[0]
+        enum entry ERROR // tech.ryadom.jabbit/JabbitLogger.Level.ERROR|null[0]
+        enum entry INFO // tech.ryadom.jabbit/JabbitLogger.Level.INFO|null[0]
+        enum entry WARN // tech.ryadom.jabbit/JabbitLogger.Level.WARN|null[0]
+
+        final val entries // tech.ryadom.jabbit/JabbitLogger.Level.entries|#static{}entries[0]
+            final fun <get-entries>(): kotlin.enums/EnumEntries<tech.ryadom.jabbit/JabbitLogger.Level> // tech.ryadom.jabbit/JabbitLogger.Level.entries.<get-entries>|<get-entries>#static(){}[0]
+
+        final fun valueOf(kotlin/String): tech.ryadom.jabbit/JabbitLogger.Level // tech.ryadom.jabbit/JabbitLogger.Level.valueOf|valueOf#static(kotlin.String){}[0]
+        final fun values(): kotlin/Array<tech.ryadom.jabbit/JabbitLogger.Level> // tech.ryadom.jabbit/JabbitLogger.Level.values|values#static(){}[0]
+    }
+
+    final object Companion { // tech.ryadom.jabbit/JabbitLogger.Companion|null[0]
+        final val Console // tech.ryadom.jabbit/JabbitLogger.Companion.Console|{}Console[0]
+            final fun <get-Console>(): tech.ryadom.jabbit/JabbitLogger // tech.ryadom.jabbit/JabbitLogger.Companion.Console.<get-Console>|<get-Console>(){}[0]
+        final val None // tech.ryadom.jabbit/JabbitLogger.Companion.None|{}None[0]
+            final fun <get-None>(): tech.ryadom.jabbit/JabbitLogger // tech.ryadom.jabbit/JabbitLogger.Companion.None.<get-None>|<get-None>(){}[0]
+    }
+}
+
+abstract fun interface tech.ryadom.jabbit/ProgressReporter { // tech.ryadom.jabbit/ProgressReporter|null[0]
+    abstract suspend fun report(tech.ryadom.jabbit/JobProgress) // tech.ryadom.jabbit/ProgressReporter.report|report(tech.ryadom.jabbit.JobProgress){}[0]
+}
+
+abstract interface tech.ryadom.jabbit/Jabbit { // tech.ryadom.jabbit/Jabbit|null[0]
+    abstract fun getJobInfoFlow(tech.ryadom.jabbit/JobId): kotlinx.coroutines.flow/Flow<tech.ryadom.jabbit/JobInfo?> // tech.ryadom.jabbit/Jabbit.getJobInfoFlow|getJobInfoFlow(tech.ryadom.jabbit.JobId){}[0]
+    abstract fun getJobInfosByTagFlow(kotlin/String): kotlinx.coroutines.flow/Flow<kotlin.collections/List<tech.ryadom.jabbit/JobInfo>> // tech.ryadom.jabbit/Jabbit.getJobInfosByTagFlow|getJobInfosByTagFlow(kotlin.String){}[0]
+    abstract fun getJobInfosForUniqueJobFlow(kotlin/String): kotlinx.coroutines.flow/Flow<kotlin.collections/List<tech.ryadom.jabbit/JobInfo>> // tech.ryadom.jabbit/Jabbit.getJobInfosForUniqueJobFlow|getJobInfosForUniqueJobFlow(kotlin.String){}[0]
+    abstract suspend fun cancelAllJobs() // tech.ryadom.jabbit/Jabbit.cancelAllJobs|cancelAllJobs(){}[0]
+    abstract suspend fun cancelJob(tech.ryadom.jabbit/JobId) // tech.ryadom.jabbit/Jabbit.cancelJob|cancelJob(tech.ryadom.jabbit.JobId){}[0]
+    abstract suspend fun cancelJobsByTag(kotlin/String) // tech.ryadom.jabbit/Jabbit.cancelJobsByTag|cancelJobsByTag(kotlin.String){}[0]
+    abstract suspend fun cancelUniqueJob(kotlin/String) // tech.ryadom.jabbit/Jabbit.cancelUniqueJob|cancelUniqueJob(kotlin.String){}[0]
+    abstract suspend fun enqueue(kotlin.collections/List<tech.ryadom.jabbit/JobRequest>) // tech.ryadom.jabbit/Jabbit.enqueue|enqueue(kotlin.collections.List<tech.ryadom.jabbit.JobRequest>){}[0]
+    abstract suspend fun enqueue(tech.ryadom.jabbit/JobRequest) // tech.ryadom.jabbit/Jabbit.enqueue|enqueue(tech.ryadom.jabbit.JobRequest){}[0]
+    abstract suspend fun enqueueUnique(kotlin/String, tech.ryadom.jabbit/ExistingJobPolicy, tech.ryadom.jabbit/OneTimeJobRequest) // tech.ryadom.jabbit/Jabbit.enqueueUnique|enqueueUnique(kotlin.String;tech.ryadom.jabbit.ExistingJobPolicy;tech.ryadom.jabbit.OneTimeJobRequest){}[0]
+    abstract suspend fun enqueueUniquePeriodic(kotlin/String, tech.ryadom.jabbit/ExistingPeriodicJobPolicy, tech.ryadom.jabbit/PeriodicJobRequest) // tech.ryadom.jabbit/Jabbit.enqueueUniquePeriodic|enqueueUniquePeriodic(kotlin.String;tech.ryadom.jabbit.ExistingPeriodicJobPolicy;tech.ryadom.jabbit.PeriodicJobRequest){}[0]
+    abstract suspend fun getJobInfo(tech.ryadom.jabbit/JobId): tech.ryadom.jabbit/JobInfo? // tech.ryadom.jabbit/Jabbit.getJobInfo|getJobInfo(tech.ryadom.jabbit.JobId){}[0]
+    abstract suspend fun getJobInfosByTag(kotlin/String): kotlin.collections/List<tech.ryadom.jabbit/JobInfo> // tech.ryadom.jabbit/Jabbit.getJobInfosByTag|getJobInfosByTag(kotlin.String){}[0]
+    abstract suspend fun getJobInfosForUniqueJob(kotlin/String): kotlin.collections/List<tech.ryadom.jabbit/JobInfo> // tech.ryadom.jabbit/Jabbit.getJobInfosForUniqueJob|getJobInfosForUniqueJob(kotlin.String){}[0]
+    abstract suspend fun pruneFinishedJobs() // tech.ryadom.jabbit/Jabbit.pruneFinishedJobs|pruneFinishedJobs(){}[0]
+}
+
+abstract interface tech.ryadom.jabbit/JabbitListener { // tech.ryadom.jabbit/JabbitListener|null[0]
+    open fun onCancelled(tech.ryadom.jabbit/JobInfo) // tech.ryadom.jabbit/JabbitListener.onCancelled|onCancelled(tech.ryadom.jabbit.JobInfo){}[0]
+    open fun onEnqueued(tech.ryadom.jabbit/JobInfo) // tech.ryadom.jabbit/JabbitListener.onEnqueued|onEnqueued(tech.ryadom.jabbit.JobInfo){}[0]
+    open fun onFailed(tech.ryadom.jabbit/JobInfo, kotlin/Throwable?) // tech.ryadom.jabbit/JabbitListener.onFailed|onFailed(tech.ryadom.jabbit.JobInfo;kotlin.Throwable?){}[0]
+    open fun onRetryScheduled(tech.ryadom.jabbit/JobInfo, kotlin/Long?) // tech.ryadom.jabbit/JabbitListener.onRetryScheduled|onRetryScheduled(tech.ryadom.jabbit.JobInfo;kotlin.Long?){}[0]
+    open fun onStarted(tech.ryadom.jabbit/JobInfo) // tech.ryadom.jabbit/JabbitListener.onStarted|onStarted(tech.ryadom.jabbit.JobInfo){}[0]
+    open fun onStopped(tech.ryadom.jabbit/JobInfo) // tech.ryadom.jabbit/JabbitListener.onStopped|onStopped(tech.ryadom.jabbit.JobInfo){}[0]
+    open fun onSucceeded(tech.ryadom.jabbit/JobInfo) // tech.ryadom.jabbit/JabbitListener.onSucceeded|onSucceeded(tech.ryadom.jabbit.JobInfo){}[0]
+}
+
+abstract interface tech.ryadom.jabbit/JabbitStorage { // tech.ryadom.jabbit/JabbitStorage|null[0]
+    abstract suspend fun read(): kotlin/String? // tech.ryadom.jabbit/JabbitStorage.read|read(){}[0]
+    abstract suspend fun write(kotlin/String) // tech.ryadom.jabbit/JabbitStorage.write|write(kotlin.String){}[0]
+}
+
+final class <#A: kotlin/Any?, #B: kotlin/Any?> tech.ryadom.jabbit/JobType { // tech.ryadom.jabbit/JobType|null[0]
+    constructor <init>(kotlin/String, kotlinx.serialization/KSerializer<#A>, kotlinx.serialization/KSerializer<#B>) // tech.ryadom.jabbit/JobType.<init>|<init>(kotlin.String;kotlinx.serialization.KSerializer<1:0>;kotlinx.serialization.KSerializer<1:1>){}[0]
+
+    final val name // tech.ryadom.jabbit/JobType.name|{}name[0]
+        final fun <get-name>(): kotlin/String // tech.ryadom.jabbit/JobType.name.<get-name>|<get-name>(){}[0]
+
+    final fun toString(): kotlin/String // tech.ryadom.jabbit/JobType.toString|toString(){}[0]
+}
+
+final class <#A: kotlin/Any?> tech.ryadom.jabbit/JobExecution { // tech.ryadom.jabbit/JobExecution|null[0]
+    final val id // tech.ryadom.jabbit/JobExecution.id|{}id[0]
+        final fun <get-id>(): tech.ryadom.jabbit/JobId // tech.ryadom.jabbit/JobExecution.id.<get-id>|<get-id>(){}[0]
+    final val input // tech.ryadom.jabbit/JobExecution.input|{}input[0]
+        final fun <get-input>(): #A // tech.ryadom.jabbit/JobExecution.input.<get-input>|<get-input>(){}[0]
+    final val runAttemptCount // tech.ryadom.jabbit/JobExecution.runAttemptCount|{}runAttemptCount[0]
+        final fun <get-runAttemptCount>(): kotlin/Int // tech.ryadom.jabbit/JobExecution.runAttemptCount.<get-runAttemptCount>|<get-runAttemptCount>(){}[0]
+    final val tags // tech.ryadom.jabbit/JobExecution.tags|{}tags[0]
+        final fun <get-tags>(): kotlin.collections/Set<kotlin/String> // tech.ryadom.jabbit/JobExecution.tags.<get-tags>|<get-tags>(){}[0]
+    final val typeName // tech.ryadom.jabbit/JobExecution.typeName|{}typeName[0]
+        final fun <get-typeName>(): kotlin/String // tech.ryadom.jabbit/JobExecution.typeName.<get-typeName>|<get-typeName>(){}[0]
+
+    final suspend fun setProgress(tech.ryadom.jabbit/JobProgress) // tech.ryadom.jabbit/JobExecution.setProgress|setProgress(tech.ryadom.jabbit.JobProgress){}[0]
+
+    final object Companion { // tech.ryadom.jabbit/JobExecution.Companion|null[0]
+        final fun <#A2: kotlin/Any?> forTesting(#A2, tech.ryadom.jabbit/JobId = ..., kotlin/String = ..., kotlin.collections/Set<kotlin/String> = ..., kotlin/Int = ..., tech.ryadom.jabbit/ProgressReporter = ...): tech.ryadom.jabbit/JobExecution<#A2> // tech.ryadom.jabbit/JobExecution.Companion.forTesting|forTesting(0:0;tech.ryadom.jabbit.JobId;kotlin.String;kotlin.collections.Set<kotlin.String>;kotlin.Int;tech.ryadom.jabbit.ProgressReporter){0§<kotlin.Any?>}[0]
+    }
+}
+
+final class tech.ryadom.jabbit/AndroidScope // tech.ryadom.jabbit/AndroidScope|null[0]
+
+final class tech.ryadom.jabbit/BrowserScope { // tech.ryadom.jabbit/BrowserScope|null[0]
+    final var backgroundSyncTag // tech.ryadom.jabbit/BrowserScope.backgroundSyncTag|{}backgroundSyncTag[0]
+        final fun <get-backgroundSyncTag>(): kotlin/String? // tech.ryadom.jabbit/BrowserScope.backgroundSyncTag.<get-backgroundSyncTag>|<get-backgroundSyncTag>(){}[0]
+        final fun <set-backgroundSyncTag>(kotlin/String?) // tech.ryadom.jabbit/BrowserScope.backgroundSyncTag.<set-backgroundSyncTag>|<set-backgroundSyncTag>(kotlin.String?){}[0]
+    final var coordinateTabs // tech.ryadom.jabbit/BrowserScope.coordinateTabs|{}coordinateTabs[0]
+        final fun <get-coordinateTabs>(): kotlin/Boolean // tech.ryadom.jabbit/BrowserScope.coordinateTabs.<get-coordinateTabs>|<get-coordinateTabs>(){}[0]
+        final fun <set-coordinateTabs>(kotlin/Boolean) // tech.ryadom.jabbit/BrowserScope.coordinateTabs.<set-coordinateTabs>|<set-coordinateTabs>(kotlin.Boolean){}[0]
+    final var lowBatteryThreshold // tech.ryadom.jabbit/BrowserScope.lowBatteryThreshold|{}lowBatteryThreshold[0]
+        final fun <get-lowBatteryThreshold>(): kotlin/Float // tech.ryadom.jabbit/BrowserScope.lowBatteryThreshold.<get-lowBatteryThreshold>|<get-lowBatteryThreshold>(){}[0]
+        final fun <set-lowBatteryThreshold>(kotlin/Float) // tech.ryadom.jabbit/BrowserScope.lowBatteryThreshold.<set-lowBatteryThreshold>|<set-lowBatteryThreshold>(kotlin.Float){}[0]
+    final var lowStorageThresholdBytes // tech.ryadom.jabbit/BrowserScope.lowStorageThresholdBytes|{}lowStorageThresholdBytes[0]
+        final fun <get-lowStorageThresholdBytes>(): kotlin/Long // tech.ryadom.jabbit/BrowserScope.lowStorageThresholdBytes.<get-lowStorageThresholdBytes>|<get-lowStorageThresholdBytes>(){}[0]
+        final fun <set-lowStorageThresholdBytes>(kotlin/Long) // tech.ryadom.jabbit/BrowserScope.lowStorageThresholdBytes.<set-lowStorageThresholdBytes>|<set-lowStorageThresholdBytes>(kotlin.Long){}[0]
+    final var periodicSyncInterval // tech.ryadom.jabbit/BrowserScope.periodicSyncInterval|{}periodicSyncInterval[0]
+        final fun <get-periodicSyncInterval>(): kotlin.time/Duration? // tech.ryadom.jabbit/BrowserScope.periodicSyncInterval.<get-periodicSyncInterval>|<get-periodicSyncInterval>(){}[0]
+        final fun <set-periodicSyncInterval>(kotlin.time/Duration?) // tech.ryadom.jabbit/BrowserScope.periodicSyncInterval.<set-periodicSyncInterval>|<set-periodicSyncInterval>(kotlin.time.Duration?){}[0]
+    final var periodicSyncTag // tech.ryadom.jabbit/BrowserScope.periodicSyncTag|{}periodicSyncTag[0]
+        final fun <get-periodicSyncTag>(): kotlin/String? // tech.ryadom.jabbit/BrowserScope.periodicSyncTag.<get-periodicSyncTag>|<get-periodicSyncTag>(){}[0]
+        final fun <set-periodicSyncTag>(kotlin/String?) // tech.ryadom.jabbit/BrowserScope.periodicSyncTag.<set-periodicSyncTag>|<set-periodicSyncTag>(kotlin.String?){}[0]
+    final var queueName // tech.ryadom.jabbit/BrowserScope.queueName|{}queueName[0]
+        final fun <get-queueName>(): kotlin/String // tech.ryadom.jabbit/BrowserScope.queueName.<get-queueName>|<get-queueName>(){}[0]
+        final fun <set-queueName>(kotlin/String) // tech.ryadom.jabbit/BrowserScope.queueName.<set-queueName>|<set-queueName>(kotlin.String){}[0]
+    final var requestPersistentStorage // tech.ryadom.jabbit/BrowserScope.requestPersistentStorage|{}requestPersistentStorage[0]
+        final fun <get-requestPersistentStorage>(): kotlin/Boolean // tech.ryadom.jabbit/BrowserScope.requestPersistentStorage.<get-requestPersistentStorage>|<get-requestPersistentStorage>(){}[0]
+        final fun <set-requestPersistentStorage>(kotlin/Boolean) // tech.ryadom.jabbit/BrowserScope.requestPersistentStorage.<set-requestPersistentStorage>|<set-requestPersistentStorage>(kotlin.Boolean){}[0]
+    final var storage // tech.ryadom.jabbit/BrowserScope.storage|{}storage[0]
+        final fun <get-storage>(): tech.ryadom.jabbit/JabbitStorage? // tech.ryadom.jabbit/BrowserScope.storage.<get-storage>|<get-storage>(){}[0]
+        final fun <set-storage>(tech.ryadom.jabbit/JabbitStorage?) // tech.ryadom.jabbit/BrowserScope.storage.<set-storage>|<set-storage>(tech.ryadom.jabbit.JabbitStorage?){}[0]
+}
+
+final class tech.ryadom.jabbit/Constraints { // tech.ryadom.jabbit/Constraints|null[0]
+    constructor <init>(tech.ryadom.jabbit/NetworkType = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ...) // tech.ryadom.jabbit/Constraints.<init>|<init>(tech.ryadom.jabbit.NetworkType;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean){}[0]
+
+    final val requiredNetworkType // tech.ryadom.jabbit/Constraints.requiredNetworkType|{}requiredNetworkType[0]
+        final fun <get-requiredNetworkType>(): tech.ryadom.jabbit/NetworkType // tech.ryadom.jabbit/Constraints.requiredNetworkType.<get-requiredNetworkType>|<get-requiredNetworkType>(){}[0]
+    final val requiresBatteryNotLow // tech.ryadom.jabbit/Constraints.requiresBatteryNotLow|{}requiresBatteryNotLow[0]
+        final fun <get-requiresBatteryNotLow>(): kotlin/Boolean // tech.ryadom.jabbit/Constraints.requiresBatteryNotLow.<get-requiresBatteryNotLow>|<get-requiresBatteryNotLow>(){}[0]
+    final val requiresCharging // tech.ryadom.jabbit/Constraints.requiresCharging|{}requiresCharging[0]
+        final fun <get-requiresCharging>(): kotlin/Boolean // tech.ryadom.jabbit/Constraints.requiresCharging.<get-requiresCharging>|<get-requiresCharging>(){}[0]
+    final val requiresDeviceIdle // tech.ryadom.jabbit/Constraints.requiresDeviceIdle|{}requiresDeviceIdle[0]
+        final fun <get-requiresDeviceIdle>(): kotlin/Boolean // tech.ryadom.jabbit/Constraints.requiresDeviceIdle.<get-requiresDeviceIdle>|<get-requiresDeviceIdle>(){}[0]
+    final val requiresStorageNotLow // tech.ryadom.jabbit/Constraints.requiresStorageNotLow|{}requiresStorageNotLow[0]
+        final fun <get-requiresStorageNotLow>(): kotlin/Boolean // tech.ryadom.jabbit/Constraints.requiresStorageNotLow.<get-requiresStorageNotLow>|<get-requiresStorageNotLow>(){}[0]
+
+    final fun component1(): tech.ryadom.jabbit/NetworkType // tech.ryadom.jabbit/Constraints.component1|component1(){}[0]
+    final fun component2(): kotlin/Boolean // tech.ryadom.jabbit/Constraints.component2|component2(){}[0]
+    final fun component3(): kotlin/Boolean // tech.ryadom.jabbit/Constraints.component3|component3(){}[0]
+    final fun component4(): kotlin/Boolean // tech.ryadom.jabbit/Constraints.component4|component4(){}[0]
+    final fun component5(): kotlin/Boolean // tech.ryadom.jabbit/Constraints.component5|component5(){}[0]
+    final fun copy(tech.ryadom.jabbit/NetworkType = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ...): tech.ryadom.jabbit/Constraints // tech.ryadom.jabbit/Constraints.copy|copy(tech.ryadom.jabbit.NetworkType;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tech.ryadom.jabbit/Constraints.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tech.ryadom.jabbit/Constraints.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tech.ryadom.jabbit/Constraints.toString|toString(){}[0]
+
+    final class Builder { // tech.ryadom.jabbit/Constraints.Builder|null[0]
+        constructor <init>() // tech.ryadom.jabbit/Constraints.Builder.<init>|<init>(){}[0]
+
+        final fun build(): tech.ryadom.jabbit/Constraints // tech.ryadom.jabbit/Constraints.Builder.build|build(){}[0]
+        final fun setRequiredNetworkType(tech.ryadom.jabbit/NetworkType): tech.ryadom.jabbit/Constraints.Builder // tech.ryadom.jabbit/Constraints.Builder.setRequiredNetworkType|setRequiredNetworkType(tech.ryadom.jabbit.NetworkType){}[0]
+        final fun setRequiresBatteryNotLow(kotlin/Boolean): tech.ryadom.jabbit/Constraints.Builder // tech.ryadom.jabbit/Constraints.Builder.setRequiresBatteryNotLow|setRequiresBatteryNotLow(kotlin.Boolean){}[0]
+        final fun setRequiresCharging(kotlin/Boolean): tech.ryadom.jabbit/Constraints.Builder // tech.ryadom.jabbit/Constraints.Builder.setRequiresCharging|setRequiresCharging(kotlin.Boolean){}[0]
+        final fun setRequiresDeviceIdle(kotlin/Boolean): tech.ryadom.jabbit/Constraints.Builder // tech.ryadom.jabbit/Constraints.Builder.setRequiresDeviceIdle|setRequiresDeviceIdle(kotlin.Boolean){}[0]
+        final fun setRequiresStorageNotLow(kotlin/Boolean): tech.ryadom.jabbit/Constraints.Builder // tech.ryadom.jabbit/Constraints.Builder.setRequiresStorageNotLow|setRequiresStorageNotLow(kotlin.Boolean){}[0]
+    }
+
+    final object Companion { // tech.ryadom.jabbit/Constraints.Companion|null[0]
+        final val NONE // tech.ryadom.jabbit/Constraints.Companion.NONE|{}NONE[0]
+            final fun <get-NONE>(): tech.ryadom.jabbit/Constraints // tech.ryadom.jabbit/Constraints.Companion.NONE.<get-NONE>|<get-NONE>(){}[0]
+    }
+}
+
+final class tech.ryadom.jabbit/ConstraintsScope { // tech.ryadom.jabbit/ConstraintsScope|null[0]
+    final var requiredNetworkType // tech.ryadom.jabbit/ConstraintsScope.requiredNetworkType|{}requiredNetworkType[0]
+        final fun <get-requiredNetworkType>(): tech.ryadom.jabbit/NetworkType // tech.ryadom.jabbit/ConstraintsScope.requiredNetworkType.<get-requiredNetworkType>|<get-requiredNetworkType>(){}[0]
+        final fun <set-requiredNetworkType>(tech.ryadom.jabbit/NetworkType) // tech.ryadom.jabbit/ConstraintsScope.requiredNetworkType.<set-requiredNetworkType>|<set-requiredNetworkType>(tech.ryadom.jabbit.NetworkType){}[0]
+    final var requiresBatteryNotLow // tech.ryadom.jabbit/ConstraintsScope.requiresBatteryNotLow|{}requiresBatteryNotLow[0]
+        final fun <get-requiresBatteryNotLow>(): kotlin/Boolean // tech.ryadom.jabbit/ConstraintsScope.requiresBatteryNotLow.<get-requiresBatteryNotLow>|<get-requiresBatteryNotLow>(){}[0]
+        final fun <set-requiresBatteryNotLow>(kotlin/Boolean) // tech.ryadom.jabbit/ConstraintsScope.requiresBatteryNotLow.<set-requiresBatteryNotLow>|<set-requiresBatteryNotLow>(kotlin.Boolean){}[0]
+    final var requiresCharging // tech.ryadom.jabbit/ConstraintsScope.requiresCharging|{}requiresCharging[0]
+        final fun <get-requiresCharging>(): kotlin/Boolean // tech.ryadom.jabbit/ConstraintsScope.requiresCharging.<get-requiresCharging>|<get-requiresCharging>(){}[0]
+        final fun <set-requiresCharging>(kotlin/Boolean) // tech.ryadom.jabbit/ConstraintsScope.requiresCharging.<set-requiresCharging>|<set-requiresCharging>(kotlin.Boolean){}[0]
+    final var requiresDeviceIdle // tech.ryadom.jabbit/ConstraintsScope.requiresDeviceIdle|{}requiresDeviceIdle[0]
+        final fun <get-requiresDeviceIdle>(): kotlin/Boolean // tech.ryadom.jabbit/ConstraintsScope.requiresDeviceIdle.<get-requiresDeviceIdle>|<get-requiresDeviceIdle>(){}[0]
+        final fun <set-requiresDeviceIdle>(kotlin/Boolean) // tech.ryadom.jabbit/ConstraintsScope.requiresDeviceIdle.<set-requiresDeviceIdle>|<set-requiresDeviceIdle>(kotlin.Boolean){}[0]
+    final var requiresStorageNotLow // tech.ryadom.jabbit/ConstraintsScope.requiresStorageNotLow|{}requiresStorageNotLow[0]
+        final fun <get-requiresStorageNotLow>(): kotlin/Boolean // tech.ryadom.jabbit/ConstraintsScope.requiresStorageNotLow.<get-requiresStorageNotLow>|<get-requiresStorageNotLow>(){}[0]
+        final fun <set-requiresStorageNotLow>(kotlin/Boolean) // tech.ryadom.jabbit/ConstraintsScope.requiresStorageNotLow.<set-requiresStorageNotLow>|<set-requiresStorageNotLow>(kotlin.Boolean){}[0]
+}
+
+final class tech.ryadom.jabbit/DesktopScope { // tech.ryadom.jabbit/DesktopScope|null[0]
+    final var applicationName // tech.ryadom.jabbit/DesktopScope.applicationName|{}applicationName[0]
+        final fun <get-applicationName>(): kotlin/String? // tech.ryadom.jabbit/DesktopScope.applicationName.<get-applicationName>|<get-applicationName>(){}[0]
+        final fun <set-applicationName>(kotlin/String?) // tech.ryadom.jabbit/DesktopScope.applicationName.<set-applicationName>|<set-applicationName>(kotlin.String?){}[0]
+    final var lowBatteryThreshold // tech.ryadom.jabbit/DesktopScope.lowBatteryThreshold|{}lowBatteryThreshold[0]
+        final fun <get-lowBatteryThreshold>(): kotlin/Float // tech.ryadom.jabbit/DesktopScope.lowBatteryThreshold.<get-lowBatteryThreshold>|<get-lowBatteryThreshold>(){}[0]
+        final fun <set-lowBatteryThreshold>(kotlin/Float) // tech.ryadom.jabbit/DesktopScope.lowBatteryThreshold.<set-lowBatteryThreshold>|<set-lowBatteryThreshold>(kotlin.Float){}[0]
+    final var lowStorageThresholdBytes // tech.ryadom.jabbit/DesktopScope.lowStorageThresholdBytes|{}lowStorageThresholdBytes[0]
+        final fun <get-lowStorageThresholdBytes>(): kotlin/Long // tech.ryadom.jabbit/DesktopScope.lowStorageThresholdBytes.<get-lowStorageThresholdBytes>|<get-lowStorageThresholdBytes>(){}[0]
+        final fun <set-lowStorageThresholdBytes>(kotlin/Long) // tech.ryadom.jabbit/DesktopScope.lowStorageThresholdBytes.<set-lowStorageThresholdBytes>|<set-lowStorageThresholdBytes>(kotlin.Long){}[0]
+    final var pollInterval // tech.ryadom.jabbit/DesktopScope.pollInterval|{}pollInterval[0]
+        final fun <get-pollInterval>(): kotlin.time/Duration? // tech.ryadom.jabbit/DesktopScope.pollInterval.<get-pollInterval>|<get-pollInterval>(){}[0]
+        final fun <set-pollInterval>(kotlin.time/Duration?) // tech.ryadom.jabbit/DesktopScope.pollInterval.<set-pollInterval>|<set-pollInterval>(kotlin.time.Duration?){}[0]
+    final var readPowerSource // tech.ryadom.jabbit/DesktopScope.readPowerSource|{}readPowerSource[0]
+        final fun <get-readPowerSource>(): kotlin/Boolean // tech.ryadom.jabbit/DesktopScope.readPowerSource.<get-readPowerSource>|<get-readPowerSource>(){}[0]
+        final fun <set-readPowerSource>(kotlin/Boolean) // tech.ryadom.jabbit/DesktopScope.readPowerSource.<set-readPowerSource>|<set-readPowerSource>(kotlin.Boolean){}[0]
+    final var singleInstanceLock // tech.ryadom.jabbit/DesktopScope.singleInstanceLock|{}singleInstanceLock[0]
+        final fun <get-singleInstanceLock>(): kotlin/Boolean // tech.ryadom.jabbit/DesktopScope.singleInstanceLock.<get-singleInstanceLock>|<get-singleInstanceLock>(){}[0]
+        final fun <set-singleInstanceLock>(kotlin/Boolean) // tech.ryadom.jabbit/DesktopScope.singleInstanceLock.<set-singleInstanceLock>|<set-singleInstanceLock>(kotlin.Boolean){}[0]
+    final var storage // tech.ryadom.jabbit/DesktopScope.storage|{}storage[0]
+        final fun <get-storage>(): tech.ryadom.jabbit/JabbitStorage? // tech.ryadom.jabbit/DesktopScope.storage.<get-storage>|<get-storage>(){}[0]
+        final fun <set-storage>(tech.ryadom.jabbit/JabbitStorage?) // tech.ryadom.jabbit/DesktopScope.storage.<set-storage>|<set-storage>(tech.ryadom.jabbit.JabbitStorage?){}[0]
+    final var storageDirectory // tech.ryadom.jabbit/DesktopScope.storageDirectory|{}storageDirectory[0]
+        final fun <get-storageDirectory>(): kotlin/String? // tech.ryadom.jabbit/DesktopScope.storageDirectory.<get-storageDirectory>|<get-storageDirectory>(){}[0]
+        final fun <set-storageDirectory>(kotlin/String?) // tech.ryadom.jabbit/DesktopScope.storageDirectory.<set-storageDirectory>|<set-storageDirectory>(kotlin.String?){}[0]
+}
+
+final class tech.ryadom.jabbit/IosScope { // tech.ryadom.jabbit/IosScope|null[0]
+    final var backgroundTaskIdentifier // tech.ryadom.jabbit/IosScope.backgroundTaskIdentifier|{}backgroundTaskIdentifier[0]
+        final fun <get-backgroundTaskIdentifier>(): kotlin/String? // tech.ryadom.jabbit/IosScope.backgroundTaskIdentifier.<get-backgroundTaskIdentifier>|<get-backgroundTaskIdentifier>(){}[0]
+        final fun <set-backgroundTaskIdentifier>(kotlin/String?) // tech.ryadom.jabbit/IosScope.backgroundTaskIdentifier.<set-backgroundTaskIdentifier>|<set-backgroundTaskIdentifier>(kotlin.String?){}[0]
+    final var lowBatteryThreshold // tech.ryadom.jabbit/IosScope.lowBatteryThreshold|{}lowBatteryThreshold[0]
+        final fun <get-lowBatteryThreshold>(): kotlin/Float // tech.ryadom.jabbit/IosScope.lowBatteryThreshold.<get-lowBatteryThreshold>|<get-lowBatteryThreshold>(){}[0]
+        final fun <set-lowBatteryThreshold>(kotlin/Float) // tech.ryadom.jabbit/IosScope.lowBatteryThreshold.<set-lowBatteryThreshold>|<set-lowBatteryThreshold>(kotlin.Float){}[0]
+    final var lowStorageThresholdBytes // tech.ryadom.jabbit/IosScope.lowStorageThresholdBytes|{}lowStorageThresholdBytes[0]
+        final fun <get-lowStorageThresholdBytes>(): kotlin/Long // tech.ryadom.jabbit/IosScope.lowStorageThresholdBytes.<get-lowStorageThresholdBytes>|<get-lowStorageThresholdBytes>(){}[0]
+        final fun <set-lowStorageThresholdBytes>(kotlin/Long) // tech.ryadom.jabbit/IosScope.lowStorageThresholdBytes.<set-lowStorageThresholdBytes>|<set-lowStorageThresholdBytes>(kotlin.Long){}[0]
+    final var storage // tech.ryadom.jabbit/IosScope.storage|{}storage[0]
+        final fun <get-storage>(): tech.ryadom.jabbit/JabbitStorage? // tech.ryadom.jabbit/IosScope.storage.<get-storage>|<get-storage>(){}[0]
+        final fun <set-storage>(tech.ryadom.jabbit/JabbitStorage?) // tech.ryadom.jabbit/IosScope.storage.<set-storage>|<set-storage>(tech.ryadom.jabbit.JabbitStorage?){}[0]
+}
+
+final class tech.ryadom.jabbit/JabbitScope { // tech.ryadom.jabbit/JabbitScope|null[0]
+    final fun <#A1: kotlin/Any?, #B1: kotlin/Any?> worker(tech.ryadom.jabbit/JobType<#A1, #B1>, kotlin/Function0<tech.ryadom.jabbit/JabbitWorker<#A1, #B1>>) // tech.ryadom.jabbit/JabbitScope.worker|worker(tech.ryadom.jabbit.JobType<0:0,0:1>;kotlin.Function0<tech.ryadom.jabbit.JabbitWorker<0:0,0:1>>){0§<kotlin.Any?>;1§<kotlin.Any?>}[0]
+    final fun android(kotlin/Function1<tech.ryadom.jabbit/AndroidScope, kotlin/Unit>) // tech.ryadom.jabbit/JabbitScope.android|android(kotlin.Function1<tech.ryadom.jabbit.AndroidScope,kotlin.Unit>){}[0]
+    final fun browser(kotlin/Function1<tech.ryadom.jabbit/BrowserScope, kotlin/Unit>) // tech.ryadom.jabbit/JabbitScope.browser|browser(kotlin.Function1<tech.ryadom.jabbit.BrowserScope,kotlin.Unit>){}[0]
+    final fun desktop(kotlin/Function1<tech.ryadom.jabbit/DesktopScope, kotlin/Unit>) // tech.ryadom.jabbit/JabbitScope.desktop|desktop(kotlin.Function1<tech.ryadom.jabbit.DesktopScope,kotlin.Unit>){}[0]
+    final fun finishedJobRetention(kotlin.time/Duration) // tech.ryadom.jabbit/JabbitScope.finishedJobRetention|finishedJobRetention(kotlin.time.Duration){}[0]
+    final fun ios(kotlin/Function1<tech.ryadom.jabbit/IosScope, kotlin/Unit>) // tech.ryadom.jabbit/JabbitScope.ios|ios(kotlin.Function1<tech.ryadom.jabbit.IosScope,kotlin.Unit>){}[0]
+    final fun listener(tech.ryadom.jabbit/JabbitListener) // tech.ryadom.jabbit/JabbitScope.listener|listener(tech.ryadom.jabbit.JabbitListener){}[0]
+    final fun logger(tech.ryadom.jabbit/JabbitLogger) // tech.ryadom.jabbit/JabbitScope.logger|logger(tech.ryadom.jabbit.JabbitLogger){}[0]
+    final fun maxConcurrentJobs(kotlin/Int) // tech.ryadom.jabbit/JabbitScope.maxConcurrentJobs|maxConcurrentJobs(kotlin.Int){}[0]
+}
+
+final class tech.ryadom.jabbit/JobInfo { // tech.ryadom.jabbit/JobInfo|null[0]
+    final val failureReason // tech.ryadom.jabbit/JobInfo.failureReason|{}failureReason[0]
+        final fun <get-failureReason>(): kotlin/String? // tech.ryadom.jabbit/JobInfo.failureReason.<get-failureReason>|<get-failureReason>(){}[0]
+    final val id // tech.ryadom.jabbit/JobInfo.id|{}id[0]
+        final fun <get-id>(): tech.ryadom.jabbit/JobId // tech.ryadom.jabbit/JobInfo.id.<get-id>|<get-id>(){}[0]
+    final val nextScheduleTimeMillis // tech.ryadom.jabbit/JobInfo.nextScheduleTimeMillis|{}nextScheduleTimeMillis[0]
+        final fun <get-nextScheduleTimeMillis>(): kotlin/Long? // tech.ryadom.jabbit/JobInfo.nextScheduleTimeMillis.<get-nextScheduleTimeMillis>|<get-nextScheduleTimeMillis>(){}[0]
+    final val progress // tech.ryadom.jabbit/JobInfo.progress|{}progress[0]
+        final fun <get-progress>(): tech.ryadom.jabbit/JobProgress? // tech.ryadom.jabbit/JobInfo.progress.<get-progress>|<get-progress>(){}[0]
+    final val runAttemptCount // tech.ryadom.jabbit/JobInfo.runAttemptCount|{}runAttemptCount[0]
+        final fun <get-runAttemptCount>(): kotlin/Int // tech.ryadom.jabbit/JobInfo.runAttemptCount.<get-runAttemptCount>|<get-runAttemptCount>(){}[0]
+    final val state // tech.ryadom.jabbit/JobInfo.state|{}state[0]
+        final fun <get-state>(): tech.ryadom.jabbit/JobState // tech.ryadom.jabbit/JobInfo.state.<get-state>|<get-state>(){}[0]
+    final val tags // tech.ryadom.jabbit/JobInfo.tags|{}tags[0]
+        final fun <get-tags>(): kotlin.collections/Set<kotlin/String> // tech.ryadom.jabbit/JobInfo.tags.<get-tags>|<get-tags>(){}[0]
+    final val typeName // tech.ryadom.jabbit/JobInfo.typeName|{}typeName[0]
+        final fun <get-typeName>(): kotlin/String // tech.ryadom.jabbit/JobInfo.typeName.<get-typeName>|<get-typeName>(){}[0]
+    final val uniqueName // tech.ryadom.jabbit/JobInfo.uniqueName|{}uniqueName[0]
+        final fun <get-uniqueName>(): kotlin/String? // tech.ryadom.jabbit/JobInfo.uniqueName.<get-uniqueName>|<get-uniqueName>(){}[0]
+
+    final fun component1(): tech.ryadom.jabbit/JobId // tech.ryadom.jabbit/JobInfo.component1|component1(){}[0]
+    final fun component2(): kotlin/String // tech.ryadom.jabbit/JobInfo.component2|component2(){}[0]
+    final fun component3(): tech.ryadom.jabbit/JobState // tech.ryadom.jabbit/JobInfo.component3|component3(){}[0]
+    final fun component4(): kotlin.collections/Set<kotlin/String> // tech.ryadom.jabbit/JobInfo.component4|component4(){}[0]
+    final fun component5(): kotlin/String? // tech.ryadom.jabbit/JobInfo.component5|component5(){}[0]
+    final fun component6(): tech.ryadom.jabbit/JobProgress? // tech.ryadom.jabbit/JobInfo.component6|component6(){}[0]
+    final fun component7(): kotlin/String? // tech.ryadom.jabbit/JobInfo.component7|component7(){}[0]
+    final fun component8(): kotlin/Int // tech.ryadom.jabbit/JobInfo.component8|component8(){}[0]
+    final fun component9(): kotlin/Long? // tech.ryadom.jabbit/JobInfo.component9|component9(){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tech.ryadom.jabbit/JobInfo.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tech.ryadom.jabbit/JobInfo.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tech.ryadom.jabbit/JobInfo.toString|toString(){}[0]
+}
+
+final class tech.ryadom.jabbit/JobProgress { // tech.ryadom.jabbit/JobProgress|null[0]
+    constructor <init>(kotlin/Float? = ..., kotlin/String? = ...) // tech.ryadom.jabbit/JobProgress.<init>|<init>(kotlin.Float?;kotlin.String?){}[0]
+
+    final val fraction // tech.ryadom.jabbit/JobProgress.fraction|{}fraction[0]
+        final fun <get-fraction>(): kotlin/Float? // tech.ryadom.jabbit/JobProgress.fraction.<get-fraction>|<get-fraction>(){}[0]
+    final val message // tech.ryadom.jabbit/JobProgress.message|{}message[0]
+        final fun <get-message>(): kotlin/String? // tech.ryadom.jabbit/JobProgress.message.<get-message>|<get-message>(){}[0]
+
+    final fun component1(): kotlin/Float? // tech.ryadom.jabbit/JobProgress.component1|component1(){}[0]
+    final fun component2(): kotlin/String? // tech.ryadom.jabbit/JobProgress.component2|component2(){}[0]
+    final fun copy(kotlin/Float? = ..., kotlin/String? = ...): tech.ryadom.jabbit/JobProgress // tech.ryadom.jabbit/JobProgress.copy|copy(kotlin.Float?;kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tech.ryadom.jabbit/JobProgress.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tech.ryadom.jabbit/JobProgress.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tech.ryadom.jabbit/JobProgress.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<tech.ryadom.jabbit/JobProgress> { // tech.ryadom.jabbit/JobProgress.$serializer|null[0]
+        final val descriptor // tech.ryadom.jabbit/JobProgress.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // tech.ryadom.jabbit/JobProgress.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // tech.ryadom.jabbit/JobProgress.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): tech.ryadom.jabbit/JobProgress // tech.ryadom.jabbit/JobProgress.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, tech.ryadom.jabbit/JobProgress) // tech.ryadom.jabbit/JobProgress.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;tech.ryadom.jabbit.JobProgress){}[0]
+    }
+
+    final object Companion { // tech.ryadom.jabbit/JobProgress.Companion|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<tech.ryadom.jabbit/JobProgress> // tech.ryadom.jabbit/JobProgress.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class tech.ryadom.jabbit/OneTimeJobRequest : tech.ryadom.jabbit/JobRequest { // tech.ryadom.jabbit/OneTimeJobRequest|null[0]
+    final val backoffDelay // tech.ryadom.jabbit/OneTimeJobRequest.backoffDelay|{}backoffDelay[0]
+        final fun <get-backoffDelay>(): kotlin.time/Duration // tech.ryadom.jabbit/OneTimeJobRequest.backoffDelay.<get-backoffDelay>|<get-backoffDelay>(){}[0]
+    final val backoffPolicy // tech.ryadom.jabbit/OneTimeJobRequest.backoffPolicy|{}backoffPolicy[0]
+        final fun <get-backoffPolicy>(): tech.ryadom.jabbit/BackoffPolicy // tech.ryadom.jabbit/OneTimeJobRequest.backoffPolicy.<get-backoffPolicy>|<get-backoffPolicy>(){}[0]
+    final val constraints // tech.ryadom.jabbit/OneTimeJobRequest.constraints|{}constraints[0]
+        final fun <get-constraints>(): tech.ryadom.jabbit/Constraints // tech.ryadom.jabbit/OneTimeJobRequest.constraints.<get-constraints>|<get-constraints>(){}[0]
+    final val id // tech.ryadom.jabbit/OneTimeJobRequest.id|{}id[0]
+        final fun <get-id>(): tech.ryadom.jabbit/JobId // tech.ryadom.jabbit/OneTimeJobRequest.id.<get-id>|<get-id>(){}[0]
+    final val initialDelay // tech.ryadom.jabbit/OneTimeJobRequest.initialDelay|{}initialDelay[0]
+        final fun <get-initialDelay>(): kotlin.time/Duration // tech.ryadom.jabbit/OneTimeJobRequest.initialDelay.<get-initialDelay>|<get-initialDelay>(){}[0]
+    final val maxAttempts // tech.ryadom.jabbit/OneTimeJobRequest.maxAttempts|{}maxAttempts[0]
+        final fun <get-maxAttempts>(): kotlin/Int // tech.ryadom.jabbit/OneTimeJobRequest.maxAttempts.<get-maxAttempts>|<get-maxAttempts>(){}[0]
+    final val tags // tech.ryadom.jabbit/OneTimeJobRequest.tags|{}tags[0]
+        final fun <get-tags>(): kotlin.collections/Set<kotlin/String> // tech.ryadom.jabbit/OneTimeJobRequest.tags.<get-tags>|<get-tags>(){}[0]
+    final val typeName // tech.ryadom.jabbit/OneTimeJobRequest.typeName|{}typeName[0]
+        final fun <get-typeName>(): kotlin/String // tech.ryadom.jabbit/OneTimeJobRequest.typeName.<get-typeName>|<get-typeName>(){}[0]
+
+    final class Builder : tech.ryadom.jabbit/JobRequest.Builder<tech.ryadom.jabbit/OneTimeJobRequest.Builder> { // tech.ryadom.jabbit/OneTimeJobRequest.Builder|null[0]
+        final fun build(): tech.ryadom.jabbit/OneTimeJobRequest // tech.ryadom.jabbit/OneTimeJobRequest.Builder.build|build(){}[0]
+    }
+}
+
+final class tech.ryadom.jabbit/PeriodicJobRequest : tech.ryadom.jabbit/JobRequest { // tech.ryadom.jabbit/PeriodicJobRequest|null[0]
+    final val backoffDelay // tech.ryadom.jabbit/PeriodicJobRequest.backoffDelay|{}backoffDelay[0]
+        final fun <get-backoffDelay>(): kotlin.time/Duration // tech.ryadom.jabbit/PeriodicJobRequest.backoffDelay.<get-backoffDelay>|<get-backoffDelay>(){}[0]
+    final val backoffPolicy // tech.ryadom.jabbit/PeriodicJobRequest.backoffPolicy|{}backoffPolicy[0]
+        final fun <get-backoffPolicy>(): tech.ryadom.jabbit/BackoffPolicy // tech.ryadom.jabbit/PeriodicJobRequest.backoffPolicy.<get-backoffPolicy>|<get-backoffPolicy>(){}[0]
+    final val constraints // tech.ryadom.jabbit/PeriodicJobRequest.constraints|{}constraints[0]
+        final fun <get-constraints>(): tech.ryadom.jabbit/Constraints // tech.ryadom.jabbit/PeriodicJobRequest.constraints.<get-constraints>|<get-constraints>(){}[0]
+    final val flexInterval // tech.ryadom.jabbit/PeriodicJobRequest.flexInterval|{}flexInterval[0]
+        final fun <get-flexInterval>(): kotlin.time/Duration // tech.ryadom.jabbit/PeriodicJobRequest.flexInterval.<get-flexInterval>|<get-flexInterval>(){}[0]
+    final val flexIntervalMillis // tech.ryadom.jabbit/PeriodicJobRequest.flexIntervalMillis|{}flexIntervalMillis[0]
+        final fun <get-flexIntervalMillis>(): kotlin/Long // tech.ryadom.jabbit/PeriodicJobRequest.flexIntervalMillis.<get-flexIntervalMillis>|<get-flexIntervalMillis>(){}[0]
+    final val id // tech.ryadom.jabbit/PeriodicJobRequest.id|{}id[0]
+        final fun <get-id>(): tech.ryadom.jabbit/JobId // tech.ryadom.jabbit/PeriodicJobRequest.id.<get-id>|<get-id>(){}[0]
+    final val initialDelay // tech.ryadom.jabbit/PeriodicJobRequest.initialDelay|{}initialDelay[0]
+        final fun <get-initialDelay>(): kotlin.time/Duration // tech.ryadom.jabbit/PeriodicJobRequest.initialDelay.<get-initialDelay>|<get-initialDelay>(){}[0]
+    final val maxAttempts // tech.ryadom.jabbit/PeriodicJobRequest.maxAttempts|{}maxAttempts[0]
+        final fun <get-maxAttempts>(): kotlin/Int // tech.ryadom.jabbit/PeriodicJobRequest.maxAttempts.<get-maxAttempts>|<get-maxAttempts>(){}[0]
+    final val repeatInterval // tech.ryadom.jabbit/PeriodicJobRequest.repeatInterval|{}repeatInterval[0]
+        final fun <get-repeatInterval>(): kotlin.time/Duration // tech.ryadom.jabbit/PeriodicJobRequest.repeatInterval.<get-repeatInterval>|<get-repeatInterval>(){}[0]
+    final val repeatIntervalMillis // tech.ryadom.jabbit/PeriodicJobRequest.repeatIntervalMillis|{}repeatIntervalMillis[0]
+        final fun <get-repeatIntervalMillis>(): kotlin/Long // tech.ryadom.jabbit/PeriodicJobRequest.repeatIntervalMillis.<get-repeatIntervalMillis>|<get-repeatIntervalMillis>(){}[0]
+    final val tags // tech.ryadom.jabbit/PeriodicJobRequest.tags|{}tags[0]
+        final fun <get-tags>(): kotlin.collections/Set<kotlin/String> // tech.ryadom.jabbit/PeriodicJobRequest.tags.<get-tags>|<get-tags>(){}[0]
+    final val typeName // tech.ryadom.jabbit/PeriodicJobRequest.typeName|{}typeName[0]
+        final fun <get-typeName>(): kotlin/String // tech.ryadom.jabbit/PeriodicJobRequest.typeName.<get-typeName>|<get-typeName>(){}[0]
+
+    final class Builder : tech.ryadom.jabbit/JobRequest.Builder<tech.ryadom.jabbit/PeriodicJobRequest.Builder> { // tech.ryadom.jabbit/PeriodicJobRequest.Builder|null[0]
+        final fun build(): tech.ryadom.jabbit/PeriodicJobRequest // tech.ryadom.jabbit/PeriodicJobRequest.Builder.build|build(){}[0]
+        final fun setFlexInterval(kotlin.time/Duration): tech.ryadom.jabbit/PeriodicJobRequest.Builder // tech.ryadom.jabbit/PeriodicJobRequest.Builder.setFlexInterval|setFlexInterval(kotlin.time.Duration){}[0]
+        final fun setFlexIntervalMillis(kotlin/Long): tech.ryadom.jabbit/PeriodicJobRequest.Builder // tech.ryadom.jabbit/PeriodicJobRequest.Builder.setFlexIntervalMillis|setFlexIntervalMillis(kotlin.Long){}[0]
+    }
+
+    final object Companion { // tech.ryadom.jabbit/PeriodicJobRequest.Companion|null[0]
+        final val MIN_FLEX_INTERVAL // tech.ryadom.jabbit/PeriodicJobRequest.Companion.MIN_FLEX_INTERVAL|{}MIN_FLEX_INTERVAL[0]
+            final fun <get-MIN_FLEX_INTERVAL>(): kotlin.time/Duration // tech.ryadom.jabbit/PeriodicJobRequest.Companion.MIN_FLEX_INTERVAL.<get-MIN_FLEX_INTERVAL>|<get-MIN_FLEX_INTERVAL>(){}[0]
+        final val MIN_PERIODIC_INTERVAL // tech.ryadom.jabbit/PeriodicJobRequest.Companion.MIN_PERIODIC_INTERVAL|{}MIN_PERIODIC_INTERVAL[0]
+            final fun <get-MIN_PERIODIC_INTERVAL>(): kotlin.time/Duration // tech.ryadom.jabbit/PeriodicJobRequest.Companion.MIN_PERIODIC_INTERVAL.<get-MIN_PERIODIC_INTERVAL>|<get-MIN_PERIODIC_INTERVAL>(){}[0]
+    }
+}
+
+final value class tech.ryadom.jabbit/JobId { // tech.ryadom.jabbit/JobId|null[0]
+    constructor <init>(kotlin/String) // tech.ryadom.jabbit/JobId.<init>|<init>(kotlin.String){}[0]
+
+    final val value // tech.ryadom.jabbit/JobId.value|{}value[0]
+        final fun <get-value>(): kotlin/String // tech.ryadom.jabbit/JobId.value.<get-value>|<get-value>(){}[0]
+
+    final fun equals(kotlin/Any?): kotlin/Boolean // tech.ryadom.jabbit/JobId.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tech.ryadom.jabbit/JobId.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tech.ryadom.jabbit/JobId.toString|toString(){}[0]
+
+    final object Companion { // tech.ryadom.jabbit/JobId.Companion|null[0]
+        final fun random(): tech.ryadom.jabbit/JobId // tech.ryadom.jabbit/JobId.Companion.random|random(){}[0]
+    }
+}
+
+sealed class <#A: out kotlin/Any?> tech.ryadom.jabbit/JobResult { // tech.ryadom.jabbit/JobResult|null[0]
+    final class <#A1: kotlin/Any?> Success : tech.ryadom.jabbit/JobResult<#A1> { // tech.ryadom.jabbit/JobResult.Success|null[0]
+        constructor <init>(#A1) // tech.ryadom.jabbit/JobResult.Success.<init>|<init>(1:0){}[0]
+
+        final val output // tech.ryadom.jabbit/JobResult.Success.output|{}output[0]
+            final fun <get-output>(): #A1 // tech.ryadom.jabbit/JobResult.Success.output.<get-output>|<get-output>(){}[0]
+
+        final fun component1(): #A1 // tech.ryadom.jabbit/JobResult.Success.component1|component1(){}[0]
+        final fun copy(#A1 = ...): tech.ryadom.jabbit/JobResult.Success<#A1> // tech.ryadom.jabbit/JobResult.Success.copy|copy(1:0){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tech.ryadom.jabbit/JobResult.Success.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tech.ryadom.jabbit/JobResult.Success.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tech.ryadom.jabbit/JobResult.Success.toString|toString(){}[0]
+    }
+
+    final class Failure : tech.ryadom.jabbit/JobResult<kotlin/Nothing> { // tech.ryadom.jabbit/JobResult.Failure|null[0]
+        constructor <init>(kotlin/String? = ...) // tech.ryadom.jabbit/JobResult.Failure.<init>|<init>(kotlin.String?){}[0]
+
+        final val reason // tech.ryadom.jabbit/JobResult.Failure.reason|{}reason[0]
+            final fun <get-reason>(): kotlin/String? // tech.ryadom.jabbit/JobResult.Failure.reason.<get-reason>|<get-reason>(){}[0]
+
+        final fun component1(): kotlin/String? // tech.ryadom.jabbit/JobResult.Failure.component1|component1(){}[0]
+        final fun copy(kotlin/String? = ...): tech.ryadom.jabbit/JobResult.Failure // tech.ryadom.jabbit/JobResult.Failure.copy|copy(kotlin.String?){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tech.ryadom.jabbit/JobResult.Failure.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tech.ryadom.jabbit/JobResult.Failure.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tech.ryadom.jabbit/JobResult.Failure.toString|toString(){}[0]
+    }
+
+    final object Companion { // tech.ryadom.jabbit/JobResult.Companion|null[0]
+        final fun <#A2: kotlin/Any?> success(#A2): tech.ryadom.jabbit/JobResult<#A2> // tech.ryadom.jabbit/JobResult.Companion.success|success(0:0){0§<kotlin.Any?>}[0]
+        final fun failure(kotlin/String? = ...): tech.ryadom.jabbit/JobResult<kotlin/Nothing> // tech.ryadom.jabbit/JobResult.Companion.failure|failure(kotlin.String?){}[0]
+        final fun retry(): tech.ryadom.jabbit/JobResult<kotlin/Nothing> // tech.ryadom.jabbit/JobResult.Companion.retry|retry(){}[0]
+        final fun success(): tech.ryadom.jabbit/JobResult<kotlin/Unit> // tech.ryadom.jabbit/JobResult.Companion.success|success(){}[0]
+    }
+
+    final object Retry : tech.ryadom.jabbit/JobResult<kotlin/Nothing> { // tech.ryadom.jabbit/JobResult.Retry|null[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tech.ryadom.jabbit/JobResult.Retry.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tech.ryadom.jabbit/JobResult.Retry.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tech.ryadom.jabbit/JobResult.Retry.toString|toString(){}[0]
+    }
+}
+
+sealed class tech.ryadom.jabbit/JobRequest { // tech.ryadom.jabbit/JobRequest|null[0]
+    abstract val backoffDelay // tech.ryadom.jabbit/JobRequest.backoffDelay|{}backoffDelay[0]
+        abstract fun <get-backoffDelay>(): kotlin.time/Duration // tech.ryadom.jabbit/JobRequest.backoffDelay.<get-backoffDelay>|<get-backoffDelay>(){}[0]
+    abstract val backoffPolicy // tech.ryadom.jabbit/JobRequest.backoffPolicy|{}backoffPolicy[0]
+        abstract fun <get-backoffPolicy>(): tech.ryadom.jabbit/BackoffPolicy // tech.ryadom.jabbit/JobRequest.backoffPolicy.<get-backoffPolicy>|<get-backoffPolicy>(){}[0]
+    abstract val constraints // tech.ryadom.jabbit/JobRequest.constraints|{}constraints[0]
+        abstract fun <get-constraints>(): tech.ryadom.jabbit/Constraints // tech.ryadom.jabbit/JobRequest.constraints.<get-constraints>|<get-constraints>(){}[0]
+    abstract val id // tech.ryadom.jabbit/JobRequest.id|{}id[0]
+        abstract fun <get-id>(): tech.ryadom.jabbit/JobId // tech.ryadom.jabbit/JobRequest.id.<get-id>|<get-id>(){}[0]
+    abstract val initialDelay // tech.ryadom.jabbit/JobRequest.initialDelay|{}initialDelay[0]
+        abstract fun <get-initialDelay>(): kotlin.time/Duration // tech.ryadom.jabbit/JobRequest.initialDelay.<get-initialDelay>|<get-initialDelay>(){}[0]
+    abstract val maxAttempts // tech.ryadom.jabbit/JobRequest.maxAttempts|{}maxAttempts[0]
+        abstract fun <get-maxAttempts>(): kotlin/Int // tech.ryadom.jabbit/JobRequest.maxAttempts.<get-maxAttempts>|<get-maxAttempts>(){}[0]
+    abstract val tags // tech.ryadom.jabbit/JobRequest.tags|{}tags[0]
+        abstract fun <get-tags>(): kotlin.collections/Set<kotlin/String> // tech.ryadom.jabbit/JobRequest.tags.<get-tags>|<get-tags>(){}[0]
+    abstract val typeName // tech.ryadom.jabbit/JobRequest.typeName|{}typeName[0]
+        abstract fun <get-typeName>(): kotlin/String // tech.ryadom.jabbit/JobRequest.typeName.<get-typeName>|<get-typeName>(){}[0]
+    final val backoffDelayMillis // tech.ryadom.jabbit/JobRequest.backoffDelayMillis|{}backoffDelayMillis[0]
+        final fun <get-backoffDelayMillis>(): kotlin/Long // tech.ryadom.jabbit/JobRequest.backoffDelayMillis.<get-backoffDelayMillis>|<get-backoffDelayMillis>(){}[0]
+    final val initialDelayMillis // tech.ryadom.jabbit/JobRequest.initialDelayMillis|{}initialDelayMillis[0]
+        final fun <get-initialDelayMillis>(): kotlin/Long // tech.ryadom.jabbit/JobRequest.initialDelayMillis.<get-initialDelayMillis>|<get-initialDelayMillis>(){}[0]
+
+    sealed class <#A1: tech.ryadom.jabbit/JobRequest.Builder<#A1>> Builder { // tech.ryadom.jabbit/JobRequest.Builder|null[0]
+        final fun addTag(kotlin/String): #A1 // tech.ryadom.jabbit/JobRequest.Builder.addTag|addTag(kotlin.String){}[0]
+        final fun addTags(kotlin.collections/Iterable<kotlin/String>): #A1 // tech.ryadom.jabbit/JobRequest.Builder.addTags|addTags(kotlin.collections.Iterable<kotlin.String>){}[0]
+        final fun setBackoffCriteria(tech.ryadom.jabbit/BackoffPolicy, kotlin.time/Duration): #A1 // tech.ryadom.jabbit/JobRequest.Builder.setBackoffCriteria|setBackoffCriteria(tech.ryadom.jabbit.BackoffPolicy;kotlin.time.Duration){}[0]
+        final fun setBackoffCriteriaMillis(tech.ryadom.jabbit/BackoffPolicy, kotlin/Long): #A1 // tech.ryadom.jabbit/JobRequest.Builder.setBackoffCriteriaMillis|setBackoffCriteriaMillis(tech.ryadom.jabbit.BackoffPolicy;kotlin.Long){}[0]
+        final fun setConstraints(tech.ryadom.jabbit/Constraints): #A1 // tech.ryadom.jabbit/JobRequest.Builder.setConstraints|setConstraints(tech.ryadom.jabbit.Constraints){}[0]
+        final fun setId(tech.ryadom.jabbit/JobId): #A1 // tech.ryadom.jabbit/JobRequest.Builder.setId|setId(tech.ryadom.jabbit.JobId){}[0]
+        final fun setInitialDelay(kotlin.time/Duration): #A1 // tech.ryadom.jabbit/JobRequest.Builder.setInitialDelay|setInitialDelay(kotlin.time.Duration){}[0]
+        final fun setInitialDelayMillis(kotlin/Long): #A1 // tech.ryadom.jabbit/JobRequest.Builder.setInitialDelayMillis|setInitialDelayMillis(kotlin.Long){}[0]
+        final fun setMaxAttempts(kotlin/Int): #A1 // tech.ryadom.jabbit/JobRequest.Builder.setMaxAttempts|setMaxAttempts(kotlin.Int){}[0]
+    }
+
+    final object Companion { // tech.ryadom.jabbit/JobRequest.Companion|null[0]
+        final const val UNLIMITED_ATTEMPTS // tech.ryadom.jabbit/JobRequest.Companion.UNLIMITED_ATTEMPTS|{}UNLIMITED_ATTEMPTS[0]
+            final fun <get-UNLIMITED_ATTEMPTS>(): kotlin/Int // tech.ryadom.jabbit/JobRequest.Companion.UNLIMITED_ATTEMPTS.<get-UNLIMITED_ATTEMPTS>|<get-UNLIMITED_ATTEMPTS>(){}[0]
+    }
+}
+
+final fun <#A: kotlin/Any?, #B: kotlin/Any?> tech.ryadom.jabbit/oneTimeJob(tech.ryadom.jabbit/JobType<#A, #B>, #A, kotlin/Function1<tech.ryadom.jabbit/OneTimeJobRequest.Builder, kotlin/Unit> = ...): tech.ryadom.jabbit/OneTimeJobRequest // tech.ryadom.jabbit/oneTimeJob|oneTimeJob(tech.ryadom.jabbit.JobType<0:0,0:1>;0:0;kotlin.Function1<tech.ryadom.jabbit.OneTimeJobRequest.Builder,kotlin.Unit>){0§<kotlin.Any?>;1§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?, #B: kotlin/Any?> tech.ryadom.jabbit/periodicJob(tech.ryadom.jabbit/JobType<#A, #B>, #A, kotlin.time/Duration, kotlin/Function1<tech.ryadom.jabbit/PeriodicJobRequest.Builder, kotlin/Unit> = ...): tech.ryadom.jabbit/PeriodicJobRequest // tech.ryadom.jabbit/periodicJob|periodicJob(tech.ryadom.jabbit.JobType<0:0,0:1>;0:0;kotlin.time.Duration;kotlin.Function1<tech.ryadom.jabbit.PeriodicJobRequest.Builder,kotlin.Unit>){0§<kotlin.Any?>;1§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?, #B: kotlin/Any?> tech.ryadom.jabbit/periodicJobMillis(tech.ryadom.jabbit/JobType<#A, #B>, #A, kotlin/Long, kotlin/Function1<tech.ryadom.jabbit/PeriodicJobRequest.Builder, kotlin/Unit> = ...): tech.ryadom.jabbit/PeriodicJobRequest // tech.ryadom.jabbit/periodicJobMillis|periodicJobMillis(tech.ryadom.jabbit.JobType<0:0,0:1>;0:0;kotlin.Long;kotlin.Function1<tech.ryadom.jabbit.PeriodicJobRequest.Builder,kotlin.Unit>){0§<kotlin.Any?>;1§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (tech.ryadom.jabbit/JobInfo).tech.ryadom.jabbit/output(tech.ryadom.jabbit/JobType<*, #A>): #A? // tech.ryadom.jabbit/output|output@tech.ryadom.jabbit.JobInfo(tech.ryadom.jabbit.JobType<*,0:0>){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> tech.ryadom.jabbit/oneTimeJob(tech.ryadom.jabbit/JobType<kotlin/Unit, #A>, kotlin/Function1<tech.ryadom.jabbit/OneTimeJobRequest.Builder, kotlin/Unit> = ...): tech.ryadom.jabbit/OneTimeJobRequest // tech.ryadom.jabbit/oneTimeJob|oneTimeJob(tech.ryadom.jabbit.JobType<kotlin.Unit,0:0>;kotlin.Function1<tech.ryadom.jabbit.OneTimeJobRequest.Builder,kotlin.Unit>){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> tech.ryadom.jabbit/periodicJob(tech.ryadom.jabbit/JobType<kotlin/Unit, #A>, kotlin.time/Duration, kotlin/Function1<tech.ryadom.jabbit/PeriodicJobRequest.Builder, kotlin/Unit> = ...): tech.ryadom.jabbit/PeriodicJobRequest // tech.ryadom.jabbit/periodicJob|periodicJob(tech.ryadom.jabbit.JobType<kotlin.Unit,0:0>;kotlin.time.Duration;kotlin.Function1<tech.ryadom.jabbit.PeriodicJobRequest.Builder,kotlin.Unit>){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> tech.ryadom.jabbit/periodicJobMillis(tech.ryadom.jabbit/JobType<kotlin/Unit, #A>, kotlin/Long, kotlin/Function1<tech.ryadom.jabbit/PeriodicJobRequest.Builder, kotlin/Unit> = ...): tech.ryadom.jabbit/PeriodicJobRequest // tech.ryadom.jabbit/periodicJobMillis|periodicJobMillis(tech.ryadom.jabbit.JobType<kotlin.Unit,0:0>;kotlin.Long;kotlin.Function1<tech.ryadom.jabbit.PeriodicJobRequest.Builder,kotlin.Unit>){0§<kotlin.Any?>}[0]
+final fun tech.ryadom.jabbit/constraints(kotlin/Function1<tech.ryadom.jabbit/ConstraintsScope, kotlin/Unit>): tech.ryadom.jabbit/Constraints // tech.ryadom.jabbit/constraints|constraints(kotlin.Function1<tech.ryadom.jabbit.ConstraintsScope,kotlin.Unit>){}[0]
+final fun tech.ryadom.jabbit/jabbit(kotlin/Function1<tech.ryadom.jabbit/JabbitScope, kotlin/Unit>): tech.ryadom.jabbit/Jabbit // tech.ryadom.jabbit/jabbit|jabbit(kotlin.Function1<tech.ryadom.jabbit.JabbitScope,kotlin.Unit>){}[0]
+final inline fun <#A: reified kotlin/Any?, #B: reified kotlin/Any?> tech.ryadom.jabbit/jobType(kotlin/String): tech.ryadom.jabbit/JobType<#A, #B> // tech.ryadom.jabbit/jobType|jobType(kotlin.String){0§<kotlin.Any?>;1§<kotlin.Any?>}[0]
+
+// Targets: [ios]
+final class tech.ryadom.jabbit/UserDefaultsJabbitStorage : tech.ryadom.jabbit/JabbitStorage { // tech.ryadom.jabbit/UserDefaultsJabbitStorage|null[0]
+    constructor <init>(platform.Foundation/NSUserDefaults = ..., kotlin/String = ...) // tech.ryadom.jabbit/UserDefaultsJabbitStorage.<init>|<init>(platform.Foundation.NSUserDefaults;kotlin.String){}[0]
+
+    final suspend fun read(): kotlin/String? // tech.ryadom.jabbit/UserDefaultsJabbitStorage.read|read(){}[0]
+    final suspend fun write(kotlin/String) // tech.ryadom.jabbit/UserDefaultsJabbitStorage.write|write(kotlin.String){}[0]
+}
+
+// Targets: [js, wasmJs]
+final class tech.ryadom.jabbit/IndexedDbJabbitStorage : tech.ryadom.jabbit/JabbitStorage { // tech.ryadom.jabbit/IndexedDbJabbitStorage|null[0]
+    constructor <init>(kotlin/String = ..., kotlin/String = ..., kotlin/String = ...) // tech.ryadom.jabbit/IndexedDbJabbitStorage.<init>|<init>(kotlin.String;kotlin.String;kotlin.String){}[0]
+
+    final suspend fun read(): kotlin/String? // tech.ryadom.jabbit/IndexedDbJabbitStorage.read|read(){}[0]
+    final suspend fun write(kotlin/String) // tech.ryadom.jabbit/IndexedDbJabbitStorage.write|write(kotlin.String){}[0]
+}
+
+// Targets: [js, wasmJs]
+final class tech.ryadom.jabbit/JabbitStorageException : kotlin/RuntimeException { // tech.ryadom.jabbit/JabbitStorageException|null[0]
+    constructor <init>(kotlin/String) // tech.ryadom.jabbit/JabbitStorageException.<init>|<init>(kotlin.String){}[0]
+}
+
+// Targets: [js, wasmJs]
+final class tech.ryadom.jabbit/LocalStorageJabbitStorage : tech.ryadom.jabbit/JabbitStorage { // tech.ryadom.jabbit/LocalStorageJabbitStorage|null[0]
+    constructor <init>(kotlin/String = ...) // tech.ryadom.jabbit/LocalStorageJabbitStorage.<init>|<init>(kotlin.String){}[0]
+
+    final suspend fun read(): kotlin/String? // tech.ryadom.jabbit/LocalStorageJabbitStorage.read|read(){}[0]
+    final suspend fun write(kotlin/String) // tech.ryadom.jabbit/LocalStorageJabbitStorage.write|write(kotlin.String){}[0]
+}
+
+// Targets: [js, wasmJs]
+final fun tech.ryadom.jabbit/startJabbitServiceWorker(kotlin/Function1<tech.ryadom.jabbit/JabbitScope, kotlin/Unit>) // tech.ryadom.jabbit/startJabbitServiceWorker|startJabbitServiceWorker(kotlin.Function1<tech.ryadom.jabbit.JabbitScope,kotlin.Unit>){}[0]
+
+// Targets: [js, wasmJs]
+final suspend fun tech.ryadom.jabbit/requestPersistentStorage(): kotlin/Boolean // tech.ryadom.jabbit/requestPersistentStorage|requestPersistentStorage(){}[0]

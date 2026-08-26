@@ -1,50 +1,45 @@
 package tech.ryadom.jabbit
 
 /**
- * A unit of background work.
+ * A unit of background work, typed by the payload it takes and the payload it returns.
  *
- * Workers are registered by name in [JabbitConfiguration] and instantiated by the library every
- * time a job starts, so they must be cheap to create and must not hold state between runs.
+ * Workers are registered against a [JobType] in the `jabbit { }` builder and instantiated by the
+ * library every time a job starts, so they must be cheap to create and must not hold state between
+ * runs.
  *
  * [doWork] runs on a background dispatcher and is cancelled cooperatively when the platform stops
  * the job — when constraints stop being satisfied, when the job is cancelled, or when the iOS
  * background window expires. Long-running loops should therefore check `isActive` or call
- * suspending functions that honour cancellation. A cancelled job returns to
- * [JobState.ENQUEUED] and runs again later.
+ * suspending functions that honour cancellation. A cancelled job returns to [JobState.ENQUEUED]
+ * and runs again later.
  *
  * ```
- * class SyncWorker(private val api: Api) : JabbitWorker {
+ * class SyncWorker(private val api: Api) : JabbitWorker<SyncInput, SyncOutput> {
  *
- *     override suspend fun doWork(job: JobExecution): JobResult {
- *         val since = job.inputData.getLong("since") ?: 0L
+ *     override suspend fun doWork(job: JobExecution<SyncInput>): JobResult<SyncOutput> {
  *         return try {
- *             api.sync(since)
- *             JobResult.success(jobDataOf("syncedAt" to now()))
+ *             JobResult.success(SyncOutput(items = api.sync(job.input.since)))
  *         } catch (e: IOException) {
- *             if (job.runAttemptCount < 5) JobResult.retry() else JobResult.failure()
+ *             JobResult.retry()
  *         }
- *     }
- *
- *     companion object {
- *         const val NAME = "sync"
  *     }
  * }
  * ```
  */
-public fun interface JabbitWorker {
+public fun interface JabbitWorker<I, O> {
 
     /**
      * Performs the work and reports its outcome.
      *
      * An exception thrown out of this method is caught and reported as [JobResult.Failure].
      */
-    public suspend fun doWork(job: JobExecution): JobResult
+    public suspend fun doWork(job: JobExecution<I>): JobResult<O>
 }
 
 /**
  * Everything a running job knows about itself.
  */
-public class JobExecution internal constructor(
+public class JobExecution<I> internal constructor(
 
     /**
      * Identifier of the running job.
@@ -52,14 +47,14 @@ public class JobExecution internal constructor(
     public val id: JobId,
 
     /**
-     * Name the worker is registered under.
+     * Name of the [JobType] this job was enqueued under.
      */
-    public val workerName: String,
+    public val typeName: String,
 
     /**
-     * Payload supplied by [JobRequest.inputData].
+     * Payload the job was enqueued with.
      */
-    public val inputData: JobData,
+    public val input: I,
 
     /**
      * Tags attached to the request.
@@ -69,8 +64,8 @@ public class JobExecution internal constructor(
     /**
      * Number of previous attempts, starting at zero.
      *
-     * Increases on every [JobResult.Retry] and every interruption, which makes it the value to
-     * check when giving up: `if (job.runAttemptCount >= 5) JobResult.failure() else JobResult.retry()`.
+     * Increases on every [JobResult.Retry] and every interruption, and is what
+     * [JobRequest.maxAttempts] is measured against.
      */
     public val runAttemptCount: Int,
 
@@ -78,13 +73,10 @@ public class JobExecution internal constructor(
 ) {
 
     /**
-     * Publishes intermediate progress, observable through [JobInfo.progress].
-     *
-     * Progress lives in memory only: it is dropped once the job finishes, and an attempt that is
-     * interrupted starts its next run without it.
+     * Publishes how far along the job is, observable through [JobInfo.progress].
      */
-    public suspend fun setProgress(data: JobData) {
-        progressReporter.report(data)
+    public suspend fun setProgress(progress: JobProgress) {
+        progressReporter.report(progress)
     }
 
     public companion object {
@@ -92,17 +84,17 @@ public class JobExecution internal constructor(
         /**
          * Creates an instance for testing a worker without a scheduler.
          */
-        public fun forTesting(
+        public fun <I> forTesting(
+            input: I,
             id: JobId = JobId.random(),
-            workerName: String = "test",
-            inputData: JobData = JobData.EMPTY,
+            typeName: String = "test",
             tags: Set<String> = emptySet(),
             runAttemptCount: Int = 0,
             progressReporter: ProgressReporter = ProgressReporter { }
-        ): JobExecution = JobExecution(
+        ): JobExecution<I> = JobExecution(
             id = id,
-            workerName = workerName,
-            inputData = inputData,
+            typeName = typeName,
+            input = input,
             tags = tags,
             runAttemptCount = runAttemptCount,
             progressReporter = progressReporter
@@ -116,23 +108,7 @@ public class JobExecution internal constructor(
 public fun interface ProgressReporter {
 
     /**
-     * Publishes [data] as the current progress of the running job.
+     * Publishes [progress] as the current progress of the running job.
      */
-    public suspend fun report(data: JobData)
-}
-
-/**
- * Creates workers by the name they were registered under.
- *
- * Implement this to resolve workers through a dependency injection container instead of
- * registering them one by one with [JabbitConfiguration.Builder.worker].
- */
-public fun interface JabbitWorkerFactory {
-
-    /**
-     * Returns a new worker for [workerName], or `null` when this factory does not know the name.
-     *
-     * A job whose worker cannot be created finishes as [JobState.FAILED].
-     */
-    public fun createWorker(workerName: String): JabbitWorker?
+    public suspend fun report(progress: JobProgress)
 }

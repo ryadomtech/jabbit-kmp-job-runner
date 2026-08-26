@@ -1,78 +1,82 @@
 package tech.ryadom.jabbit.demo
 
 import kotlinx.coroutines.delay
+import kotlinx.serialization.Serializable
 import tech.ryadom.jabbit.JabbitWorker
 import tech.ryadom.jabbit.JobExecution
+import tech.ryadom.jabbit.JobProgress
 import tech.ryadom.jabbit.JobResult
-import tech.ryadom.jabbit.jobDataOf
+import tech.ryadom.jabbit.jobType
 import kotlin.random.Random
 
-class UploadWorker : JabbitWorker {
+@Serializable
+data class UploadInput(val fileName: String, val chunks: Int = 5, val flaky: Boolean = false)
 
-    override suspend fun doWork(job: JobExecution): JobResult {
-        val fileName = job.inputData.getString("file", "report.pdf")
-        val chunks = job.inputData.getInt("chunks", 5)
+@Serializable
+data class UploadOutput(val fileName: String)
+
+@Serializable
+data class SyncOutput(val items: Int)
+
+@Serializable
+data class CleanupOutput(val removed: Int)
+
+val UploadJob = jobType<UploadInput, UploadOutput>("upload")
+
+val SyncJob = jobType<Unit, SyncOutput>("sync")
+
+val CleanupJob = jobType<Unit, CleanupOutput>("cleanup")
+
+val BrokenJob = jobType<Unit, Unit>("broken")
+
+class UploadWorker : JabbitWorker<UploadInput, UploadOutput> {
+
+    override suspend fun doWork(job: JobExecution<UploadInput>): JobResult<UploadOutput> {
+        val chunks = job.input.chunks
 
         repeat(chunks) { index ->
             delay(CHUNK_MILLIS)
             job.setProgress(
-                jobDataOf(
-                    "percent" to (index + 1) * 100 / chunks,
-                    "file" to fileName
+                JobProgress(
+                    fraction = (index + 1) / chunks.toFloat(),
+                    message = "uploading ${job.input.fileName}"
                 )
             )
         }
 
-        if (job.inputData.getBoolean("flaky", false) && job.runAttemptCount == 0) {
+        if (job.input.flaky && job.runAttemptCount == 0) {
             return JobResult.retry()
         }
 
-        return JobResult.success(jobDataOf("uploaded" to fileName))
+        return JobResult.success(UploadOutput(job.input.fileName))
     }
 
-    companion object {
+    private companion object {
 
-        const val NAME: String = "upload"
-
-        private const val CHUNK_MILLIS = 700L
+        const val CHUNK_MILLIS = 700L
     }
 }
 
-class SyncWorker : JabbitWorker {
+class SyncWorker : JabbitWorker<Unit, SyncOutput> {
 
-    override suspend fun doWork(job: JobExecution): JobResult {
+    override suspend fun doWork(job: JobExecution<Unit>): JobResult<SyncOutput> {
         delay(1_500)
-        return JobResult.success(jobDataOf("items" to Random.nextInt(3, 40)))
-    }
-
-    companion object {
-
-        const val NAME: String = "sync"
+        return JobResult.success(SyncOutput(Random.nextInt(3, 40)))
     }
 }
 
-class CleanupWorker : JabbitWorker {
+class CleanupWorker : JabbitWorker<Unit, CleanupOutput> {
 
-    override suspend fun doWork(job: JobExecution): JobResult {
+    override suspend fun doWork(job: JobExecution<Unit>): JobResult<CleanupOutput> {
         delay(900)
-        return JobResult.success(jobDataOf("removed" to Random.nextInt(0, 12)))
-    }
-
-    companion object {
-
-        const val NAME: String = "cleanup"
+        return JobResult.success(CleanupOutput(Random.nextInt(0, 12)))
     }
 }
 
-class BrokenWorker : JabbitWorker {
+class BrokenWorker : JabbitWorker<Unit, Unit> {
 
-    override suspend fun doWork(job: JobExecution): JobResult {
+    override suspend fun doWork(job: JobExecution<Unit>): JobResult<Unit> {
         delay(600)
-        return JobResult.failure(jobDataOf("reason" to "the server rejected this request"))
-    }
-
-    companion object {
-
-        const val NAME: String = "broken"
+        return JobResult.failure("the server rejected this request")
     }
 }

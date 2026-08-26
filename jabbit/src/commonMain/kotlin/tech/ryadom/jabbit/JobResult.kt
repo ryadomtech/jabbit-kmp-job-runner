@@ -3,21 +3,21 @@ package tech.ryadom.jabbit
 /**
  * Outcome a worker reports at the end of [JabbitWorker.doWork].
  */
-public sealed class JobResult {
+public sealed class JobResult<out O> {
 
     /**
      * The job finished successfully.
      *
-     * A periodic job is scheduled for its next period; a one-time job reaches
-     * [JobState.SUCCEEDED] and stops.
+     * A periodic job is scheduled for its next period; a one-time job reaches [JobState.SUCCEEDED]
+     * and stops.
      */
-    public data class Success(
+    public data class Success<O>(
 
         /**
-         * Payload exposed through [JobInfo.outputData].
+         * Payload readable through [JobInfo.output].
          */
-        public val outputData: JobData = JobData.EMPTY
-    ) : JobResult()
+        public val output: O
+    ) : JobResult<O>()
 
     /**
      * The job failed permanently and must not be retried.
@@ -27,31 +27,36 @@ public sealed class JobResult {
     public data class Failure(
 
         /**
-         * Payload exposed through [JobInfo.outputData].
+         * Why the job failed, readable through [JobInfo.failureReason].
          */
-        public val outputData: JobData = JobData.EMPTY
-    ) : JobResult()
+        public val reason: String? = null
+    ) : JobResult<Nothing>()
 
     /**
      * The job should run again later, after the backoff delay of its request.
      */
-    public data object Retry : JobResult()
+    public data object Retry : JobResult<Nothing>()
 
     public companion object {
 
         /**
          * Creates a [Success] result.
          */
-        public fun success(outputData: JobData = JobData.EMPTY): JobResult = Success(outputData)
+        public fun <O> success(output: O): JobResult<O> = Success(output)
+
+        /**
+         * Creates a [Success] result for a job that produces nothing.
+         */
+        public fun success(): JobResult<Unit> = Success(Unit)
 
         /**
          * Creates a [Failure] result.
          */
-        public fun failure(outputData: JobData = JobData.EMPTY): JobResult = Failure(outputData)
+        public fun failure(reason: String? = null): JobResult<Nothing> = Failure(reason)
 
         /**
          * Returns the [Retry] result.
          */
-        public fun retry(): JobResult = Retry
+        public fun retry(): JobResult<Nothing> = Retry
     }
 }

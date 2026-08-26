@@ -11,8 +11,12 @@ concurrency:
 
 jobs:
   build:
-    name: Build and test
-    runs-on: macOS-latest
+    name: Build and test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ macOS-latest, ubuntu-latest ]
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -42,5 +46,5 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: test-reports
+          name: test-reports-${{ matrix.os }}
           path: '**/build/reports/tests/**'

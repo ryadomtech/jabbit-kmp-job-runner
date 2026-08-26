@@ -5,26 +5,39 @@ import tech.ryadom.jabbit.BackoffPolicy
 import tech.ryadom.jabbit.ExistingJobPolicy
 import tech.ryadom.jabbit.ExistingPeriodicJobPolicy
 import tech.ryadom.jabbit.Jabbit
-import tech.ryadom.jabbit.JabbitConfiguration
 import tech.ryadom.jabbit.JabbitLogger
 import tech.ryadom.jabbit.JobInfo
 import tech.ryadom.jabbit.NetworkType
 import tech.ryadom.jabbit.constraints
-import tech.ryadom.jabbit.jabbitConfiguration
-import tech.ryadom.jabbit.jobDataOf
+import tech.ryadom.jabbit.jabbit
 import tech.ryadom.jabbit.oneTimeJob
+import tech.ryadom.jabbit.output
 import tech.ryadom.jabbit.periodicJob
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.seconds
 
-private const val DEMO_TAG: String = "demo"
+const val DEMO_TAG: String = "demo"
 
-fun demoConfiguration(): JabbitConfiguration = jabbitConfiguration {
-    worker(UploadWorker.NAME) { UploadWorker() }
-    worker(SyncWorker.NAME) { SyncWorker() }
-    worker(CleanupWorker.NAME) { CleanupWorker() }
-    worker(BrokenWorker.NAME) { BrokenWorker() }
+fun createDemoJabbit(): Jabbit = jabbit {
+    worker(UploadJob) { UploadWorker() }
+    worker(SyncJob) { SyncWorker() }
+    worker(CleanupJob) { CleanupWorker() }
+    worker(BrokenJob) { BrokenWorker() }
     logger(JabbitLogger.Console)
+
+    android { }
+
+    ios {
+        backgroundTaskIdentifier = "tech.ryadom.jabbit.demo.jobs"
+    }
+
+    desktop {
+        applicationName = "Jabbit Demo"
+    }
+
+    browser {
+        queueName = "demo"
+    }
 }
 
 class JabbitDemo(private val jabbit: Jabbit) {
@@ -33,8 +46,7 @@ class JabbitDemo(private val jabbit: Jabbit) {
 
     suspend fun uploadOverWifi() {
         jabbit.enqueue(
-            oneTimeJob(UploadWorker.NAME) {
-                setInputData(jobDataOf("file" to "holiday-photos.zip", "chunks" to 6))
+            oneTimeJob(UploadJob, UploadInput(fileName = "holiday-photos.zip", chunks = 6)) {
                 setConstraints(constraints { requiredNetworkType = NetworkType.UNMETERED })
                 addTag(DEMO_TAG)
             }
@@ -43,15 +55,12 @@ class JabbitDemo(private val jabbit: Jabbit) {
 
     suspend fun uploadWithRetry() {
         jabbit.enqueue(
-            oneTimeJob(UploadWorker.NAME) {
-                setInputData(
-                    jobDataOf(
-                        "file" to "flaky-upload.bin",
-                        "chunks" to 3,
-                        "flaky" to true
-                    )
-                )
+            oneTimeJob(
+                UploadJob,
+                UploadInput(fileName = "flaky-upload.bin", chunks = 3, flaky = true)
+            ) {
                 setBackoffCriteria(BackoffPolicy.LINEAR, 10.seconds)
+                setMaxAttempts(3)
                 addTag(DEMO_TAG)
             }
         )
@@ -61,7 +70,7 @@ class JabbitDemo(private val jabbit: Jabbit) {
         jabbit.enqueueUnique(
             uniqueName = "sync",
             policy = ExistingJobPolicy.KEEP,
-            request = oneTimeJob(SyncWorker.NAME) {
+            request = oneTimeJob(SyncJob) {
                 setConstraints(constraints { requiredNetworkType = NetworkType.CONNECTED })
                 addTag(DEMO_TAG)
             }
@@ -70,7 +79,7 @@ class JabbitDemo(private val jabbit: Jabbit) {
 
     suspend fun cleanupWhileCharging() {
         jabbit.enqueue(
-            oneTimeJob(CleanupWorker.NAME) {
+            oneTimeJob(CleanupJob) {
                 setConstraints(constraints { requiresCharging = true })
                 addTag(DEMO_TAG)
             }
@@ -81,18 +90,14 @@ class JabbitDemo(private val jabbit: Jabbit) {
         jabbit.enqueueUniquePeriodic(
             uniqueName = "cleanup",
             policy = ExistingPeriodicJobPolicy.KEEP,
-            request = periodicJob(CleanupWorker.NAME, repeatInterval = 6.hours) {
+            request = periodicJob(CleanupJob, repeatInterval = 6.hours) {
                 addTag(DEMO_TAG)
             }
         )
     }
 
     suspend fun failingJob() {
-        jabbit.enqueue(
-            oneTimeJob(BrokenWorker.NAME) {
-                addTag(DEMO_TAG)
-            }
-        )
+        jabbit.enqueue(oneTimeJob(BrokenJob) { addTag(DEMO_TAG) })
     }
 
     suspend fun cancelEverything() {
@@ -105,14 +110,14 @@ class JabbitDemo(private val jabbit: Jabbit) {
 }
 
 fun JobInfo.contentToString(): String = buildString {
-    append(workerName)
+    append(typeName)
     uniqueName?.let { append(" · $it") }
 
-    progress.getInt("percent")?.let { append(" · $it%") }
-    outputData.getString("uploaded")?.let { append(" · $it") }
-    outputData.getInt("items")?.let { append(" · $it items") }
-    outputData.getInt("removed")?.let { append(" · $it files removed") }
-    outputData.getString("reason")?.let { append(" · $it") }
+    progress?.fraction?.let { append(" · ${(it * 100).toInt()}%") }
+    output(UploadJob)?.let { append(" · ${it.fileName}") }
+    output(SyncJob)?.let { append(" · ${it.items} items") }
+    output(CleanupJob)?.let { append(" · ${it.removed} files removed") }
+    failureReason?.let { append(" · $it") }
 
     if (runAttemptCount > 0) append(" · attempt ${runAttemptCount + 1}")
 }

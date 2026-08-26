@@ -1,5 +1,7 @@
 package tech.ryadom.jabbit
 
+import tech.ryadom.jabbit.internal.decodePayload
+
 /**
  * Lifecycle state of an enqueued job.
  */
@@ -31,7 +33,7 @@ public enum class JobState {
     FAILED,
 
     /**
-     * Canceled before it could finish.
+     * Cancelled before it could finish.
      */
     CANCELLED;
 
@@ -45,10 +47,10 @@ public enum class JobState {
 /**
  * Snapshot of an enqueued job.
  *
- * Finished jobs are kept for [JabbitConfiguration.finishedJobRetention] so their output can still
- * be read, then pruned.
+ * Finished jobs are kept for a while so their outcome can still be read, then pruned.
  */
-public data class JobInfo(
+@ConsistentCopyVisibility
+public data class JobInfo internal constructor(
 
     /**
      * Identifier of the job.
@@ -56,9 +58,9 @@ public data class JobInfo(
     public val id: JobId,
 
     /**
-     * Name the job's worker is registered under.
+     * Name of the [JobType] the job belongs to.
      */
-    public val workerName: String,
+    public val typeName: String,
 
     /**
      * Current state.
@@ -76,14 +78,15 @@ public data class JobInfo(
     public val uniqueName: String?,
 
     /**
-     * Payload of the last [JobResult.Success] or [JobResult.Failure].
+     * What the last [JobExecution.setProgress] call reported, or `null` when the job never
+     * reported anything or has already finished.
      */
-    public val outputData: JobData,
+    public val progress: JobProgress?,
 
     /**
-     * Payload of the last [JobExecution.setProgress] call.
+     * Why the job failed, when it failed and the worker said why.
      */
-    public val progress: JobData,
+    public val failureReason: String?,
 
     /**
      * Number of times the job has been started, starting at zero for the first attempt.
@@ -93,5 +96,20 @@ public data class JobInfo(
     /**
      * Epoch milliseconds of the next planned run, or `null` when no run is planned.
      */
-    public val nextScheduleTimeMillis: Long?
+    public val nextScheduleTimeMillis: Long?,
+
+    internal val encodedOutput: String?
 )
+
+/**
+ * Reads what the job produced, or `null` when it has not succeeded yet.
+ *
+ * [type] has to be the one the job was enqueued with; a payload written by a different type reads
+ * back as `null` rather than throwing.
+ *
+ * ```
+ * val items = jabbit.getJobInfo(id)?.output(SyncJob)?.items
+ * ```
+ */
+public fun <O> JobInfo.output(type: JobType<*, O>): O? =
+    decodePayload(type.outputSerializer, encodedOutput)

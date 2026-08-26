@@ -12,10 +12,10 @@ class JobRequestTest {
 
     @Test
     fun coercesBackoffDelayIntoTheSupportedRange() {
-        val tooShort = oneTimeJob("worker") {
+        val tooShort = oneTimeJob(OkJob) {
             setBackoffCriteria(BackoffPolicy.LINEAR, 1.seconds)
         }
-        val tooLong = oneTimeJob("worker") {
+        val tooLong = oneTimeJob(OkJob) {
             setBackoffCriteria(BackoffPolicy.LINEAR, 10.hours)
         }
 
@@ -25,7 +25,7 @@ class JobRequestTest {
 
     @Test
     fun coercesPeriodicIntervalAndFlex() {
-        val request = periodicJob("worker", repeatInterval = 1.minutes) {
+        val request = periodicJob(OkJob, repeatInterval = 1.minutes) {
             setFlexInterval(1.seconds)
         }
 
@@ -35,14 +35,14 @@ class JobRequestTest {
 
     @Test
     fun defaultsFlexToTheWholeInterval() {
-        val request = periodicJob("worker", repeatInterval = 2.hours)
+        val request = periodicJob(OkJob, repeatInterval = 2.hours)
 
         assertEquals(2.hours, request.flexInterval)
     }
 
     @Test
     fun clampsFlexToTheInterval() {
-        val request = periodicJob("worker", repeatInterval = 30.minutes) {
+        val request = periodicJob(OkJob, repeatInterval = 30.minutes) {
             setFlexInterval(2.hours)
         }
 
@@ -51,25 +51,24 @@ class JobRequestTest {
 
     @Test
     fun rejectsInvalidInput() {
-        assertFailsWith<IllegalArgumentException> { oneTimeJob(" ") }
         assertFailsWith<IllegalArgumentException> {
-            oneTimeJob("worker") { setInitialDelay((-1).seconds) }
+            oneTimeJob(OkJob) { setInitialDelay((-1).seconds) }
         }
-        assertFailsWith<IllegalArgumentException> { oneTimeJob("worker") { addTag(" ") } }
+        assertFailsWith<IllegalArgumentException> { oneTimeJob(OkJob) { addTag(" ") } }
         assertFailsWith<IllegalArgumentException> {
-            oneTimeJob("worker") { addTag("${RESERVED_TAG_PREFIX}mine") }
+            oneTimeJob(OkJob) { addTag("${RESERVED_TAG_PREFIX}mine") }
         }
     }
 
     @Test
     fun millisecondOverloadsMatchTheDurationOnes() {
-        val fromDuration = periodicJob("worker", repeatInterval = 30.minutes) {
+        val fromDuration = periodicJob(OkJob, repeatInterval = 30.minutes) {
             setInitialDelay(45.seconds)
             setFlexInterval(10.minutes)
             setBackoffCriteria(BackoffPolicy.LINEAR, 20.seconds)
         }
 
-        val fromMillis = periodicJobMillis("worker", repeatIntervalMillis = 30 * 60 * 1000L) {
+        val fromMillis = periodicJobMillis(OkJob, repeatIntervalMillis = 30 * 60 * 1000L) {
             setInitialDelayMillis(45_000)
             setFlexIntervalMillis(10 * 60 * 1000L)
             setBackoffCriteriaMillis(BackoffPolicy.LINEAR, 20_000)
@@ -83,9 +82,20 @@ class JobRequestTest {
     }
 
     @Test
+    fun keepsRetryingUnlessAttemptsAreCapped() {
+        assertEquals(JobRequest.UNLIMITED_ATTEMPTS, oneTimeJob(OkJob).maxAttempts)
+        assertEquals(4, oneTimeJob(OkJob) { setMaxAttempts(4) }.maxAttempts)
+        assertEquals(
+            2,
+            periodicJob(OkJob, repeatInterval = 1.hours) { setMaxAttempts(2) }.maxAttempts
+        )
+        assertFailsWith<IllegalArgumentException> { oneTimeJob(OkJob) { setMaxAttempts(0) } }
+    }
+
+    @Test
     fun generatesDistinctIdentifiers() {
-        val first = oneTimeJob("worker")
-        val second = oneTimeJob("worker")
+        val first = oneTimeJob(OkJob)
+        val second = oneTimeJob(OkJob)
 
         assertEquals(36, first.id.value.length)
         assertNotEquals(first.id, second.id)

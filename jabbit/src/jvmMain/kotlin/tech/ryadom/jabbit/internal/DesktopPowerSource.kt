@@ -17,7 +17,7 @@ internal object DesktopPowerSource {
         val os = System.getProperty("os.name").orEmpty().lowercase()
         return try {
             when {
-                os.contains("linux") -> readLinux()
+                os.contains("linux") -> readLinux(File(LINUX_POWER_SUPPLY))
                 os.contains("mac") || os.contains("darwin") -> readMacOs()
                 else -> PowerStatus()
             }
@@ -26,8 +26,8 @@ internal object DesktopPowerSource {
         }
     }
 
-    private fun readLinux(): PowerStatus {
-        val supplies = File(LINUX_POWER_SUPPLY).listFiles().orEmpty()
+    fun readLinux(root: File): PowerStatus {
+        val supplies = root.listFiles().orEmpty()
         if (supplies.isEmpty()) return PowerStatus()
 
         var charging: Boolean? = null

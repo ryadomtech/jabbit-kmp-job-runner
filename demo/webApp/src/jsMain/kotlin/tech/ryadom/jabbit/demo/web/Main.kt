@@ -6,23 +6,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.w3c.dom.HTMLElement
-import tech.ryadom.jabbit.JabbitBrowserOptions
 import tech.ryadom.jabbit.JobInfo
 import tech.ryadom.jabbit.JobState
-import tech.ryadom.jabbit.createJabbit
 import tech.ryadom.jabbit.demo.JabbitDemo
 import tech.ryadom.jabbit.demo.contentToString
-import tech.ryadom.jabbit.demo.demoConfiguration
+import tech.ryadom.jabbit.demo.createDemoJabbit
 
 private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
 fun main() {
-    val demo = JabbitDemo(
-        createJabbit(
-            configuration = demoConfiguration(),
-            options = JabbitBrowserOptions(queueName = "demo")
-        )
-    )
+    val demo = JabbitDemo(createDemoJabbit())
 
     val root = document.getElementById("app") as HTMLElement
     root.appendChild(
