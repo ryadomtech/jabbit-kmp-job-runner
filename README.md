@@ -14,7 +14,7 @@ the app, using whatever background windows the platform grants.
 - One-time and periodic jobs, unique jobs, tags, retries with exponential or linear backoff,
   input/output payloads, progress, and observable state as `Flow`.
 
-API documentation: **https://ryadomtech.github.io/jabbit-kmp-job-runner**
+Generated API dokka: **https://ryadomtech.github.io/jabbit-kmp-job-runner**
 
 ## Installation
 
